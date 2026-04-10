@@ -1,6 +1,5 @@
-/* TypingFlow – Claude-themed typing session overlay */
+/* TypingFlow – Overlay Styles */
 
-/* ─── Overlay Shell ──────────────────────────────────────────────────────────*/
 #tf-overlay {
   position: fixed !important;
   inset: 0 !important;
@@ -8,160 +7,143 @@
   background: #1a1814 !important;
   display: flex !important;
   flex-direction: column !important;
-  align-items: center !important;
-  justify-content: center !important;
   font-family: 'Georgia', 'Times New Roman', serif !important;
-  animation: tf-in 0.35s ease !important;
-  outline: none !important;
+  animation: tf-in 0.3s ease !important;
+  overflow: hidden !important;
 }
 
 @keyframes tf-in {
-  from { opacity: 0; transform: scale(0.97); }
-  to   { opacity: 1; transform: scale(1); }
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
-/* ─── Main Wrap ──────────────────────────────────────────────────────────────*/
-#tf-overlay .tf-wrap {
+/* ── TOP HALF – content display ─────────────────────────────────────────────*/
+#tf-overlay .tf-top {
+  flex: 1 !important;
   display: flex !important;
   flex-direction: column !important;
-  width: min(760px, 92vw) !important;
-  gap: 0 !important;
+  padding: 28px 10vw 24px !important;
+  overflow: hidden !important;
+  min-height: 0 !important;
 }
 
-/* ─── Header ─────────────────────────────────────────────────────────────────*/
+/* Header bar */
 #tf-overlay .tf-header {
   display: flex !important;
   align-items: center !important;
-  gap: 12px !important;
-  padding-bottom: 14px !important;
-  border-bottom: 1px solid #2e2a24 !important;
-  margin-bottom: 4px !important;
-}
-
-#tf-overlay .tf-brand {
-  display: flex !important;
-  align-items: center !important;
-  gap: 8px !important;
-  flex: none !important;
+  gap: 10px !important;
+  margin-bottom: 24px !important;
+  flex-shrink: 0 !important;
 }
 
 #tf-overlay .tf-diamond {
   color: #cc785c !important;
-  font-size: 16px !important;
+  font-size: 15px !important;
   animation: tf-pulse 3s ease-in-out infinite !important;
+  flex-shrink: 0 !important;
 }
 
-@keyframes tf-pulse {
-  0%,100% { opacity: 1; }
-  50%      { opacity: 0.45; }
-}
+@keyframes tf-pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
 
-#tf-overlay .tf-name {
+#tf-overlay .tf-title {
   font-family: 'SF Mono', 'Fira Code', monospace !important;
-  font-size: 11px !important;
-  font-weight: 700 !important;
+  font-size: 10px !important;
   letter-spacing: 3px !important;
-  text-transform: uppercase !important;
   color: #cc785c !important;
+  flex-shrink: 0 !important;
 }
 
-#tf-overlay .tf-meta {
-  flex: 1 !important;
-  display: flex !important;
-  gap: 8px !important;
-  justify-content: center !important;
-}
-
-#tf-overlay .tf-badge {
-  font-family: 'SF Mono', monospace !important;
-  font-size: 11px !important;
-  padding: 3px 10px !important;
-  border: 1px solid #2e2a24 !important;
-  border-radius: 20px !important;
-  color: #6b6560 !important;
-  letter-spacing: 0.5px !important;
-  min-width: 60px !important;
-  text-align: center !important;
-  transition: color 0.3s, border-color 0.3s !important;
-}
-
-#tf-overlay .tf-exit {
-  background: none !important;
-  border: 1px solid #2e2a24 !important;
-  color: #4a4540 !important;
-  width: 26px !important;
-  height: 26px !important;
-  border-radius: 50% !important;
-  cursor: pointer !important;
-  font-size: 11px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  flex: none !important;
-  transition: all 0.2s !important;
-  padding: 0 !important;
-}
-
-#tf-overlay .tf-exit:hover {
-  border-color: #cc785c !important;
-  color: #cc785c !important;
-}
-
-/* ─── Progress ───────────────────────────────────────────────────────────────*/
 #tf-overlay .tf-progress-track {
+  flex: 1 !important;
   height: 2px !important;
   background: #2e2a24 !important;
   border-radius: 1px !important;
   overflow: hidden !important;
-  margin-bottom: 28px !important;
 }
 
 #tf-overlay .tf-progress-fill {
   height: 100% !important;
   background: linear-gradient(90deg, #cc785c, #e8a87c) !important;
-  border-radius: 1px !important;
-  transition: width 0.5s ease !important;
+  transition: width 0.4s ease !important;
   width: 0% !important;
 }
 
-/* ─── Context label ──────────────────────────────────────────────────────────*/
+#tf-overlay .tf-counter {
+  font-family: 'SF Mono', monospace !important;
+  font-size: 10px !important;
+  color: #3d3830 !important;
+  flex-shrink: 0 !important;
+  letter-spacing: 1px !important;
+}
+
+#tf-overlay .tf-live {
+  display: flex !important;
+  gap: 8px !important;
+  flex-shrink: 0 !important;
+}
+
+#tf-overlay .tf-live span {
+  font-family: 'SF Mono', monospace !important;
+  font-size: 10px !important;
+  color: #4a4540 !important;
+  padding: 2px 8px !important;
+  border: 1px solid #2e2a24 !important;
+  border-radius: 10px !important;
+  min-width: 54px !important;
+  text-align: center !important;
+}
+
+#tf-overlay .tf-exit {
+  background: none !important;
+  border: 1px solid #2e2a24 !important;
+  color: #3d3830 !important;
+  width: 24px !important;
+  height: 24px !important;
+  border-radius: 50% !important;
+  cursor: pointer !important;
+  font-size: 10px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+  padding: 0 !important;
+  transition: all 0.2s !important;
+}
+
+#tf-overlay .tf-exit:hover { border-color: #cc785c !important; color: #cc785c !important; }
+
+/* Context label */
 #tf-overlay .tf-context {
   font-family: 'SF Mono', monospace !important;
   font-size: 10px !important;
   letter-spacing: 2px !important;
   text-transform: uppercase !important;
   color: #3d3830 !important;
-  margin-bottom: 14px !important;
-  padding-left: 2px !important;
-  min-height: 14px !important;
-}
-
-/* ─── Target text (character spans) ─────────────────────────────────────────*/
-#tf-overlay .tf-target {
-  font-size: 26px !important;
-  line-height: 1.75 !important;
-  letter-spacing: 0.01em !important;
-  color: #d4cfc8 !important;
-  font-family: 'Georgia', 'Times New Roman', serif !important;
   margin-bottom: 20px !important;
-  min-height: 80px !important;
-  word-break: break-word !important;
-  transition: opacity 0.2s !important;
+  flex-shrink: 0 !important;
 }
 
-#tf-overlay .tf-target.tf-chunk-done {
+/* Target text */
+#tf-overlay .tf-target {
+  font-size: clamp(22px, 3.2vw, 32px) !important;
+  line-height: 1.8 !important;
+  color: #d4cfc8 !important;
+  font-family: 'Georgia', serif !important;
+  word-break: break-word !important;
+  overflow-y: auto !important;
+  flex: 1 !important;
+  transition: opacity 0.25s !important;
+}
+
+#tf-overlay .tf-target.tf-done-flash {
   opacity: 0 !important;
 }
 
 /* Character states */
-#tf-overlay .tf-char {
-  display: inline !important;
-  position: relative !important;
-  transition: color 0.05s !important;
-}
+#tf-overlay .tf-ch { display: inline !important; }
 
 #tf-overlay .tf-pending {
-  color: #3d3830 !important;
+  color: #3a3530 !important;
 }
 
 #tf-overlay .tf-correct {
@@ -170,176 +152,143 @@
 
 #tf-overlay .tf-wrong {
   color: #c87171 !important;
-  background: #3a1a1a !important;
+  background: rgba(200, 113, 113, 0.12) !important;
   border-radius: 2px !important;
 }
 
-#tf-overlay .tf-current {
+#tf-overlay .tf-cursor {
   color: #d4cfc8 !important;
-  border-bottom: 2px solid #cc785c !important;
-  animation: tf-cursor-blink 1s step-end infinite !important;
+  border-bottom: 2.5px solid #cc785c !important;
+  animation: tf-blink 1s step-end infinite !important;
 }
 
-@keyframes tf-cursor-blink {
+@keyframes tf-blink {
   0%,100% { border-bottom-color: #cc785c; }
   50%      { border-bottom-color: transparent; }
 }
 
-/* ─── Stats row ──────────────────────────────────────────────────────────────*/
-#tf-overlay .tf-stats-row {
+/* ── DIVIDER ────────────────────────────────────────────────────────────────*/
+#tf-overlay .tf-divider {
+  height: 1px !important;
+  background: #2e2a24 !important;
+  flex-shrink: 0 !important;
+}
+
+/* ── BOTTOM HALF – typing line ──────────────────────────────────────────────*/
+#tf-overlay .tf-bottom {
   display: flex !important;
-  justify-content: space-between !important;
   align-items: center !important;
-  margin-bottom: 16px !important;
-}
-
-#tf-overlay .tf-chunk-counter {
-  font-family: 'SF Mono', monospace !important;
-  font-size: 10px !important;
-  color: #3d3830 !important;
-  letter-spacing: 1px !important;
-}
-
-#tf-overlay .tf-errors {
-  font-family: 'SF Mono', monospace !important;
-  font-size: 10px !important;
-  color: #3d3830 !important;
-  letter-spacing: 1px !important;
-  transition: color 0.2s !important;
-}
-
-/* ─── Hidden input ───────────────────────────────────────────────────────────*/
-#tf-overlay .tf-input {
-  width: 100% !important;
+  gap: 14px !important;
+  padding: 22px 10vw !important;
+  flex-shrink: 0 !important;
   background: #12100e !important;
-  border: 1px solid #2e2a24 !important;
-  border-radius: 8px !important;
-  padding: 14px 16px !important;
-  color: transparent !important; /* text is invisible — display is in target spans */
-  caret-color: #cc785c !important;
-  font-family: 'Georgia', serif !important;
-  font-size: 16px !important;
+}
+
+#tf-overlay .tf-prompt {
+  color: #cc785c !important;
+  font-family: 'SF Mono', monospace !important;
+  font-size: 22px !important;
+  flex-shrink: 0 !important;
+  line-height: 1 !important;
+}
+
+#tf-overlay .tf-input {
+  flex: 1 !important;
+  background: transparent !important;
+  border: none !important;
   outline: none !important;
-  transition: border-color 0.2s !important;
-  box-sizing: border-box !important;
+  color: #d4cfc8 !important;
+  font-family: 'Georgia', serif !important;
+  font-size: clamp(18px, 2.2vw, 24px) !important;
+  caret-color: #cc785c !important;
   letter-spacing: 0.01em !important;
-  cursor: text !important;
-  height: 52px !important;
+  padding: 0 !important;
 }
 
 #tf-overlay .tf-input::placeholder {
-  color: #3d3830 !important;
-  font-family: 'SF Mono', monospace !important;
-  font-size: 12px !important;
-  letter-spacing: 1px !important;
-}
-
-#tf-overlay .tf-input:focus {
-  border-color: #cc785c66 !important;
-  box-shadow: 0 0 0 3px #cc785c11 !important;
-}
-
-/* ─── Hint row ───────────────────────────────────────────────────────────────*/
-#tf-overlay .tf-hint {
-  margin-top: 12px !important;
-  font-family: 'SF Mono', monospace !important;
-  font-size: 10px !important;
   color: #2e2a24 !important;
-  letter-spacing: 0.5px !important;
-  text-align: center !important;
-}
-
-#tf-overlay .tf-key {
-  display: inline-block !important;
-  padding: 1px 6px !important;
-  background: #12100e !important;
-  border: 1px solid #2e2a24 !important;
-  border-radius: 4px !important;
-  color: #3d3830 !important;
-  font-size: 9px !important;
-  margin: 0 2px !important;
-}
-
-/* ─── Session Complete ───────────────────────────────────────────────────────*/
-#tf-overlay .tf-complete {
-  position: absolute !important;
-  inset: 0 !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  background: #1a1814 !important;
-}
-
-#tf-overlay .tf-complete-inner {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  gap: 12px !important;
-  text-align: center !important;
-  padding: 40px !important;
-  animation: tf-in 0.4s ease !important;
-}
-
-#tf-overlay .tf-complete-diamond {
-  color: #cc785c !important;
-  font-size: 48px !important;
-  line-height: 1 !important;
-  margin-bottom: 8px !important;
-}
-
-#tf-overlay .tf-complete-title {
-  color: #d4cfc8 !important;
-  font-size: 28px !important;
-  font-family: 'Georgia', serif !important;
-  font-weight: 700 !important;
-}
-
-#tf-overlay .tf-complete-sub {
-  color: #4a4540 !important;
   font-family: 'SF Mono', monospace !important;
-  font-size: 12px !important;
+  font-size: 13px !important;
   letter-spacing: 1px !important;
-  margin-bottom: 24px !important;
 }
 
-#tf-overlay .tf-score-grid {
-  display: flex !important;
-  gap: 16px !important;
-  margin-bottom: 28px !important;
-}
-
-#tf-overlay .tf-score-card {
-  background: #12100e !important;
-  border: 1px solid #2e2a24 !important;
-  border-radius: 10px !important;
-  padding: 20px 28px !important;
-  min-width: 100px !important;
-}
-
-#tf-overlay .tf-score-val {
-  color: #cc785c !important;
-  font-family: 'Georgia', serif !important;
-  font-size: 32px !important;
-  font-weight: 700 !important;
-  line-height: 1 !important;
-  margin-bottom: 6px !important;
-}
-
-#tf-overlay .tf-score-label {
-  color: #4a4540 !important;
+#tf-overlay .tf-tab-hint {
   font-family: 'SF Mono', monospace !important;
-  font-size: 10px !important;
-  letter-spacing: 1.5px !important;
+  font-size: 9px !important;
+  color: #2a2722 !important;
+  letter-spacing: 1px !important;
+  flex-shrink: 0 !important;
   text-transform: uppercase !important;
 }
 
-#tf-overlay .tf-done-btn {
+/* ── SESSION COMPLETE ───────────────────────────────────────────────────────*/
+#tf-overlay .tf-complete {
+  position: absolute !important;
+  inset: 0 !important;
+  background: #1a1814 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+#tf-overlay .tf-complete-box {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 10px !important;
+  animation: tf-in 0.3s ease !important;
+}
+
+#tf-overlay .tf-c-diamond {
+  color: #cc785c !important;
+  font-size: 40px !important;
+  margin-bottom: 6px !important;
+}
+
+#tf-overlay .tf-c-title {
+  font-size: 26px !important;
+  color: #d4cfc8 !important;
+  font-family: 'Georgia', serif !important;
+  margin-bottom: 20px !important;
+}
+
+#tf-overlay .tf-c-scores {
+  display: flex !important;
+  gap: 14px !important;
+  margin-bottom: 28px !important;
+}
+
+#tf-overlay .tf-c-card {
+  background: #12100e !important;
+  border: 1px solid #2e2a24 !important;
+  border-radius: 10px !important;
+  padding: 18px 26px !important;
+  text-align: center !important;
+}
+
+#tf-overlay .tf-c-val {
+  font-size: 30px !important;
+  color: #cc785c !important;
+  font-family: 'Georgia', serif !important;
+  font-weight: 700 !important;
+  margin-bottom: 4px !important;
+}
+
+#tf-overlay .tf-c-lbl {
+  font-family: 'SF Mono', monospace !important;
+  font-size: 9px !important;
+  letter-spacing: 2px !important;
+  text-transform: uppercase !important;
+  color: #4a4540 !important;
+}
+
+#tf-overlay .tf-c-btn {
   background: #cc785c !important;
   border: none !important;
   border-radius: 8px !important;
   color: #1a1814 !important;
   font-family: 'SF Mono', monospace !important;
-  font-size: 12px !important;
+  font-size: 11px !important;
   font-weight: 700 !important;
   letter-spacing: 2px !important;
   text-transform: uppercase !important;
@@ -348,7 +297,7 @@
   transition: all 0.2s !important;
 }
 
-#tf-overlay .tf-done-btn:hover {
+#tf-overlay .tf-c-btn:hover {
   background: #e8a87c !important;
   transform: translateY(-1px) !important;
 }

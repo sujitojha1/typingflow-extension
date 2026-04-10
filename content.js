@@ -1,74 +1,56 @@
 // TypingFlow – Content Script
-// Extracts key sentences from the page and presents them for the USER to type.
-// Typing forces active recall, dramatically improving retention.
 
 let sessionActive = false;
 let overlay = null;
-let chunks = [];          // { context, text } objects
+let chunks = [];
 let chunkIndex = 0;
-let charIndex = 0;
 let wrongCount = 0;
 let totalTyped = 0;
 let startTime = null;
 let timerInterval = null;
-let sessionStats = { wpm: [], accuracy: [], completed: 0 };
 
 // ─── Content Extraction ───────────────────────────────────────────────────────
 
 function extractKeyContent() {
   const result = { title: '', chunks: [] };
-
   result.title =
     document.querySelector('h1')?.innerText?.trim() ||
-    document.title?.trim() ||
-    'Page';
+    document.title?.trim() || 'Page';
 
-  // Find content root
   const contentRoot = findContentRoot();
   if (!contentRoot) return result;
 
-  // Get all headings to define sections
   const headings = Array.from(contentRoot.querySelectorAll('h1,h2,h3,h4'));
 
   if (headings.length > 0) {
-    headings.forEach((heading) => {
-      const headingText = heading.innerText?.trim();
+    headings.forEach((h) => {
+      const headingText = h.innerText?.trim();
       if (!headingText || headingText.length < 3) return;
-
-      const paras = getParagraphsAfter(heading, contentRoot);
-      const sentences = pickKeySentences(paras, 2); // top 2 per section
-
-      sentences.forEach((s) => {
-        result.chunks.push({ context: headingText, text: s });
-      });
+      const paras = getParagraphsAfter(h, contentRoot);
+      pickKeySentences(paras, 2).forEach((s) =>
+        result.chunks.push({ context: headingText, text: s })
+      );
     });
   }
 
-  // Fallback — no headings, extract from all paragraphs
   if (result.chunks.length === 0) {
     const paras = Array.from(contentRoot.querySelectorAll('p'))
       .map((p) => p.innerText?.trim())
       .filter((t) => t && t.length > 60);
-    const sentences = pickKeySentences(paras, 12);
-    sentences.forEach((s) => result.chunks.push({ context: result.title, text: s }));
+    pickKeySentences(paras, 12).forEach((s) =>
+      result.chunks.push({ context: result.title, text: s })
+    );
   }
 
-  // Split long chunks at word boundaries (~90 chars)
-  result.chunks = result.chunks.flatMap((c) => splitChunk(c));
-
-  // Cap at 25 chunks for a focused session
-  result.chunks = result.chunks.slice(0, 25);
-
+  result.chunks = result.chunks.flatMap(splitChunk).slice(0, 25);
   return result;
 }
 
 function findContentRoot() {
-  const selectors = [
-    'article', '[role="main"]', 'main', '.post-content', '.article-content',
-    '.entry-content', '.content-body', '.story-body', '#content',
-    '#main-content', '.markdown-body', '.article__body', '.post-body',
-  ];
-  for (const sel of selectors) {
+  for (const sel of [
+    'article','[role="main"]','main','.post-content','.article-content',
+    '.entry-content','.content-body','#content','#main-content','.markdown-body',
+  ]) {
     const el = document.querySelector(sel);
     if (el && el.innerText?.trim().length > 200) return el;
   }
@@ -77,7 +59,7 @@ function findContentRoot() {
 
 function scoredFallback() {
   let best = null, bestScore = 0;
-  document.querySelectorAll('div, section').forEach((el) => {
+  document.querySelectorAll('div,section').forEach((el) => {
     const text = el.innerText?.trim() || '';
     const pCount = el.querySelectorAll('p').length;
     const linkDensity = el.querySelectorAll('a').length /
@@ -107,9 +89,7 @@ function pickKeySentences(paragraphs, max) {
       const text = s.trim().replace(/\s+/g, ' ');
       if (text.length < 35 || text.length > 400) return;
       if (/^(click|sign up|subscribe|follow|read more|learn more)/i.test(text)) return;
-      // Score: prefer first sentence of first paragraph, prefer longer sentences
-      const score = (pi === 0 && si === 0 ? 15 : 0) +
-                    (si === 0 ? 5 : 0) +
+      const score = (pi === 0 && si === 0 ? 15 : 0) + (si === 0 ? 5 : 0) +
                     Math.min(text.length, 120) / 8;
       all.push({ text, score });
     });
@@ -122,271 +102,207 @@ function splitChunk({ context, text }) {
   if (text.length <= 100) return [{ context, text }];
   const words = text.split(' ');
   const parts = [];
-  let current = '';
+  let cur = '';
   words.forEach((w) => {
-    if ((current + ' ' + w).length > 95 && current) {
-      parts.push({ context, text: current.trim() });
-      current = w;
+    if ((cur + ' ' + w).length > 95 && cur) {
+      parts.push({ context, text: cur.trim() });
+      cur = w;
     } else {
-      current = current ? current + ' ' + w : w;
+      cur = cur ? cur + ' ' + w : w;
     }
   });
-  if (current) parts.push({ context, text: current.trim() });
+  if (cur) parts.push({ context, text: cur.trim() });
   return parts;
 }
 
-// ─── Overlay HTML ─────────────────────────────────────────────────────────────
+// ─── Overlay ──────────────────────────────────────────────────────────────────
 
 function buildOverlay(data) {
   const ov = document.createElement('div');
   ov.id = 'tf-overlay';
-  ov.setAttribute('tabindex', '0');
   ov.innerHTML = `
-    <div class="tf-wrap">
-
-      <!-- Header -->
+    <div class="tf-top">
       <div class="tf-header">
-        <div class="tf-brand">
-          <span class="tf-diamond">◆</span>
-          <span class="tf-name">TypingFlow</span>
+        <span class="tf-diamond">◆</span>
+        <span class="tf-title">TYPINGFLOW</span>
+        <div class="tf-progress-track"><div class="tf-progress-fill" id="tf-progress"></div></div>
+        <span class="tf-counter" id="tf-counter">1/${data.chunks.length}</span>
+        <div class="tf-live">
+          <span id="tf-wpm">– WPM</span>
+          <span id="tf-acc">– %</span>
         </div>
-        <div class="tf-meta">
-          <span class="tf-badge" id="tf-wpm">-- WPM</span>
-          <span class="tf-badge" id="tf-acc">-- %</span>
-          <span class="tf-badge" id="tf-timer">0:00</span>
-        </div>
-        <button class="tf-exit" id="tf-exit" title="Exit (Esc)">✕</button>
+        <button class="tf-exit" id="tf-exit">✕</button>
       </div>
-
-      <!-- Progress bar -->
-      <div class="tf-progress-track">
-        <div class="tf-progress-fill" id="tf-progress"></div>
-      </div>
-
-      <!-- Context label -->
       <div class="tf-context" id="tf-context"></div>
-
-      <!-- Target text display (character spans) -->
       <div class="tf-target" id="tf-target"></div>
-
-      <!-- Stats row below target -->
-      <div class="tf-stats-row">
-        <span class="tf-chunk-counter" id="tf-counter">1 / ${data.chunks.length}</span>
-        <span class="tf-errors" id="tf-errors">Errors: 0</span>
-      </div>
-
-      <!-- Hidden input to capture typing -->
-      <input
-        type="text"
-        id="tf-input"
-        class="tf-input"
-        autocomplete="off"
-        autocorrect="off"
-        autocapitalize="off"
-        spellcheck="false"
-        placeholder="Click here and start typing..."
-      />
-
-      <!-- Instructions -->
-      <div class="tf-hint" id="tf-hint">
-        Click the input box above and type the highlighted text exactly.
-        <span class="tf-key">Tab</span> to skip · <span class="tf-key">Esc</span> to exit
-      </div>
-
     </div>
 
-    <!-- Session complete screen -->
+    <div class="tf-divider"></div>
+
+    <div class="tf-bottom">
+      <span class="tf-prompt">›</span>
+      <input
+        id="tf-input"
+        class="tf-input"
+        type="text"
+        autocomplete="off" autocorrect="off"
+        autocapitalize="off" spellcheck="false"
+        placeholder="start typing…"
+      />
+      <span class="tf-tab-hint">Tab = skip</span>
+    </div>
+
     <div class="tf-complete" id="tf-complete" style="display:none">
-      <div class="tf-complete-inner">
-        <div class="tf-complete-diamond">◆</div>
-        <div class="tf-complete-title">Session Complete</div>
-        <div class="tf-complete-sub">You typed ${data.chunks.length} key passages</div>
-        <div class="tf-score-grid" id="tf-score-grid"></div>
-        <button class="tf-done-btn" id="tf-done-btn">Done</button>
+      <div class="tf-complete-box">
+        <div class="tf-c-diamond">◆</div>
+        <div class="tf-c-title">Session Complete</div>
+        <div class="tf-c-scores" id="tf-c-scores"></div>
+        <button class="tf-c-btn" id="tf-c-btn">Close</button>
       </div>
     </div>
   `;
   return ov;
 }
 
-// ─── Typing Engine ────────────────────────────────────────────────────────────
+// ─── Chunk Render ─────────────────────────────────────────────────────────────
 
 function loadChunk(index) {
   const chunk = chunks[index];
-  const targetEl = document.getElementById('tf-target');
-  const contextEl = document.getElementById('tf-context');
-  const counterEl = document.getElementById('tf-counter');
-  const progressEl = document.getElementById('tf-progress');
-  const errorsEl = document.getElementById('tf-errors');
-  const inputEl = document.getElementById('tf-input');
+  const target = document.getElementById('tf-target');
+  const input  = document.getElementById('tf-input');
 
-  contextEl.textContent = chunk.context;
-  counterEl.textContent = `${index + 1} / ${chunks.length}`;
-  progressEl.style.width = `${(index / chunks.length) * 100}%`;
-  errorsEl.textContent = 'Errors: 0';
+  document.getElementById('tf-context').textContent = chunk.context;
+  document.getElementById('tf-counter').textContent = `${index + 1}/${chunks.length}`;
+  document.getElementById('tf-progress').style.width = `${(index / chunks.length) * 100}%`;
 
-  // Build character spans
-  targetEl.innerHTML = '';
-  Array.from(chunk.text).forEach((ch, i) => {
+  target.innerHTML = '';
+  Array.from(chunk.text).forEach((ch) => {
     const span = document.createElement('span');
-    span.className = 'tf-char tf-pending';
-    span.textContent = ch === ' ' ? '\u00A0' : ch; // non-breaking space
-    span.dataset.index = i;
-    span.dataset.char = ch;
-    targetEl.appendChild(span);
+    span.className = 'tf-ch tf-pending';
+    span.textContent = ch === ' ' ? '\u00A0' : ch;
+    target.appendChild(span);
   });
+  // mark first char
+  const first = target.querySelector('.tf-ch');
+  if (first) first.classList.replace('tf-pending', 'tf-cursor');
 
-  // Mark first char as current
-  const first = targetEl.querySelector('.tf-char');
-  if (first) first.classList.replace('tf-pending', 'tf-current');
-
-  charIndex = 0;
+  input.value = '';
   wrongCount = 0;
   totalTyped = 0;
   startTime = null;
+  clearInterval(timerInterval);
+  timerInterval = null;
 
-  inputEl.value = '';
-  inputEl.focus();
+  input.focus();
 }
 
+// ─── Typing Handler ───────────────────────────────────────────────────────────
+
 function handleInput(e) {
-  const inputEl = e.target;
-  const typed = inputEl.value;
-  const chunk = chunks[chunkIndex];
-  const target = chunk.text;
+  const input  = e.target;
+  const typed  = input.value;
+  const target = chunks[chunkIndex].text;
+  const spans  = document.querySelectorAll('#tf-target .tf-ch');
 
   // Start timer on first keystroke
   if (!startTime && typed.length > 0) {
     startTime = Date.now();
-    startTimer();
+    const timerStart = Date.now();
+    timerInterval = setInterval(() => updateLiveStats(typed.length, wrongCount), 500);
   }
 
-  // Rebuild state from typed string (handles paste, backspace, etc.)
-  const spans = document.querySelectorAll('#tf-target .tf-char');
+  // Update span states
+  let errors = 0;
   spans.forEach((span, i) => {
-    span.className = 'tf-char';
+    span.className = 'tf-ch';
     if (i < typed.length) {
-      const typedChar = typed[i];
-      const expectedChar = target[i];
-      span.classList.add(typedChar === expectedChar ? 'tf-correct' : 'tf-wrong');
+      const ok = typed[i] === target[i];
+      span.classList.add(ok ? 'tf-correct' : 'tf-wrong');
+      if (!ok) errors++;
     } else if (i === typed.length) {
-      span.classList.add('tf-current');
+      span.classList.add('tf-cursor');
     } else {
       span.classList.add('tf-pending');
     }
   });
 
-  // Scroll current char into view
-  const currentSpan = document.querySelector('#tf-target .tf-current');
-  if (currentSpan) currentSpan.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-
-  // Count errors (wrong chars in current typed string)
-  const errors = Array.from(typed).filter((ch, i) => ch !== target[i]).length;
-  document.getElementById('tf-errors').textContent = `Errors: ${errors}`;
   wrongCount = errors;
   totalTyped = typed.length;
-
   updateLiveStats(typed.length, errors);
 
-  // Check if complete (typed all chars, all correct)
-  if (typed.length === target.length) {
-    const allCorrect = Array.from(typed).every((ch, i) => ch === target[i]);
-    if (allCorrect) {
-      onChunkComplete();
-    }
-    // Don't allow typing beyond target length
-    if (typed.length >= target.length) {
-      inputEl.value = typed.slice(0, target.length);
-    }
+  // Prevent typing past end
+  if (typed.length > target.length) {
+    input.value = typed.slice(0, target.length);
+    return;
   }
-}
 
-function onChunkComplete() {
-  const elapsed = startTime ? (Date.now() - startTime) / 1000 / 60 : 0;
-  const wordCount = chunks[chunkIndex].text.split(' ').length;
-  const wpm = elapsed > 0 ? Math.round(wordCount / elapsed) : 0;
-  const accuracy = totalTyped > 0
-    ? Math.round(((totalTyped - wrongCount) / totalTyped) * 100)
-    : 100;
-
-  sessionStats.wpm.push(wpm);
-  sessionStats.accuracy.push(accuracy);
-  sessionStats.completed++;
-
-  clearInterval(timerInterval);
-  timerInterval = null;
-
-  // Flash complete
-  document.getElementById('tf-target').classList.add('tf-chunk-done');
-
-  setTimeout(() => {
-    document.getElementById('tf-target').classList.remove('tf-chunk-done');
-    chunkIndex++;
-    if (chunkIndex < chunks.length) {
-      document.getElementById('tf-progress').style.width =
-        `${(chunkIndex / chunks.length) * 100}%`;
-      loadChunk(chunkIndex);
-    } else {
-      showComplete();
-    }
-  }, 600);
+  // Complete when all correct
+  if (typed.length === target.length && errors === 0) {
+    onChunkDone();
+  }
 }
 
 function updateLiveStats(typed, errors) {
   if (!startTime) return;
-  const elapsed = (Date.now() - startTime) / 1000 / 60;
-  const words = (typed - errors) / 5;
-  const wpm = elapsed > 0 ? Math.round(words / elapsed) : 0;
+  const mins = (Date.now() - startTime) / 60000;
+  const wpm = mins > 0 ? Math.round((typed - errors) / 5 / mins) : 0;
   const acc = typed > 0 ? Math.round(((typed - errors) / typed) * 100) : 100;
   document.getElementById('tf-wpm').textContent = `${wpm} WPM`;
-  document.getElementById('tf-acc').textContent = `${acc}%`;
+  document.getElementById('tf-acc').textContent  = `${acc}%`;
 }
 
-function startTimer() {
-  const timerEl = document.getElementById('tf-timer');
-  const start = Date.now();
-  timerInterval = setInterval(() => {
-    const s = Math.floor((Date.now() - start) / 1000);
-    const m = Math.floor(s / 60);
-    timerEl.textContent = `${m}:${String(s % 60).padStart(2, '0')}`;
-  }, 1000);
+let sessionWpms = [], sessionAccs = [];
+
+function onChunkDone() {
+  const input = document.getElementById('tf-input');
+  input.disabled = true;
+
+  // Capture stats
+  if (startTime) {
+    const mins = (Date.now() - startTime) / 60000;
+    const words = chunks[chunkIndex].text.split(' ').length;
+    sessionWpms.push(mins > 0 ? Math.round(words / mins) : 0);
+    sessionAccs.push(totalTyped > 0
+      ? Math.round(((totalTyped - wrongCount) / totalTyped) * 100)
+      : 100);
+  }
+
+  clearInterval(timerInterval);
+
+  // Flash green, then next
+  document.getElementById('tf-target').classList.add('tf-done-flash');
+  setTimeout(() => {
+    document.getElementById('tf-target').classList.remove('tf-done-flash');
+    input.disabled = false;
+    chunkIndex++;
+    if (chunkIndex < chunks.length) {
+      loadChunk(chunkIndex);
+    } else {
+      showComplete();
+    }
+  }, 500);
 }
 
 function showComplete() {
-  document.querySelector('.tf-wrap').style.display = 'none';
-  const complete = document.getElementById('tf-complete');
-  complete.style.display = 'flex';
-
-  const avgWpm = Math.round(sessionStats.wpm.reduce((a,b) => a+b, 0) / sessionStats.wpm.length) || 0;
-  const avgAcc = Math.round(sessionStats.accuracy.reduce((a,b) => a+b, 0) / sessionStats.accuracy.length) || 0;
-
-  document.getElementById('tf-score-grid').innerHTML = `
-    <div class="tf-score-card">
-      <div class="tf-score-val">${avgWpm}</div>
-      <div class="tf-score-label">Avg WPM</div>
-    </div>
-    <div class="tf-score-card">
-      <div class="tf-score-val">${avgAcc}%</div>
-      <div class="tf-score-label">Accuracy</div>
-    </div>
-    <div class="tf-score-card">
-      <div class="tf-score-val">${sessionStats.completed}</div>
-      <div class="tf-score-label">Passages</div>
-    </div>
+  document.getElementById('tf-complete').style.display = 'flex';
+  const avgWpm = Math.round(sessionWpms.reduce((a,b)=>a+b,0)/Math.max(1,sessionWpms.length));
+  const avgAcc = Math.round(sessionAccs.reduce((a,b)=>a+b,0)/Math.max(1,sessionAccs.length));
+  document.getElementById('tf-c-scores').innerHTML = `
+    <div class="tf-c-card"><div class="tf-c-val">${avgWpm}</div><div class="tf-c-lbl">Avg WPM</div></div>
+    <div class="tf-c-card"><div class="tf-c-val">${avgAcc}%</div><div class="tf-c-lbl">Accuracy</div></div>
+    <div class="tf-c-card"><div class="tf-c-val">${chunkIndex}</div><div class="tf-c-lbl">Passages</div></div>
   `;
-
-  document.getElementById('tf-done-btn').addEventListener('click', closeSession);
+  document.getElementById('tf-c-btn').addEventListener('click', closeSession);
 }
 
-// ─── Keyboard shortcuts ───────────────────────────────────────────────────────
+// ─── Keys ─────────────────────────────────────────────────────────────────────
 
 function handleKey(e) {
   if (!sessionActive) return;
   if (e.key === 'Escape') { e.preventDefault(); closeSession(); }
   if (e.key === 'Tab') {
     e.preventDefault();
-    // Skip current chunk
-    clearInterval(timerInterval); timerInterval = null;
+    clearInterval(timerInterval);
     chunkIndex++;
     if (chunkIndex < chunks.length) loadChunk(chunkIndex);
     else showComplete();
@@ -397,16 +313,16 @@ function handleKey(e) {
 
 function openSession() {
   if (sessionActive) return;
-
   const data = extractKeyContent();
   if (!data.chunks.length) {
-    alert('TypingFlow: Could not find enough readable content on this page.');
+    alert('TypingFlow: No readable content found on this page.');
     return;
   }
 
   chunks = data.chunks;
   chunkIndex = 0;
-  sessionStats = { wpm: [], accuracy: [], completed: 0 };
+  sessionWpms = [];
+  sessionAccs = [];
   sessionActive = true;
 
   overlay = buildOverlay(data);
@@ -417,19 +333,17 @@ function openSession() {
   document.addEventListener('keydown', handleKey);
 
   loadChunk(0);
-  document.getElementById('tf-input').focus();
 }
 
 function closeSession() {
   sessionActive = false;
   clearInterval(timerInterval);
-  timerInterval = null;
-  if (overlay) { overlay.remove(); overlay = null; }
+  overlay?.remove();
+  overlay = null;
   document.removeEventListener('keydown', handleKey);
 }
 
-// ─── Message Bridge ───────────────────────────────────────────────────────────
 chrome.runtime.onMessage.addListener((msg) => {
-  if (msg.action === 'open') openSession();
+  if (msg.action === 'open')  openSession();
   if (msg.action === 'close') closeSession();
 });
