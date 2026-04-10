@@ -1,0 +1,297 @@
+/* TypingFlow – Claude-themed typing session overlay */
+
+#typingflow-overlay {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 2147483647 !important;
+  background: #1a1814 !important;
+  font-family: 'Georgia', 'Times New Roman', serif !important;
+  overflow: hidden !important;
+  animation: tf-fade-in 0.4s ease !important;
+}
+
+@keyframes tf-fade-in {
+  from { opacity: 0; transform: scale(0.98); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* ── Container ── */
+#typingflow-overlay .tf-container {
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100vh !important;
+  max-width: 780px !important;
+  margin: 0 auto !important;
+  padding: 0 24px !important;
+  box-sizing: border-box !important;
+}
+
+/* ── Header ── */
+#typingflow-overlay .tf-header {
+  display: flex !important;
+  align-items: center !important;
+  gap: 16px !important;
+  padding: 18px 0 14px !important;
+  border-bottom: 1px solid #2e2a24 !important;
+  flex-shrink: 0 !important;
+}
+
+#typingflow-overlay .tf-brand {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  flex-shrink: 0 !important;
+}
+
+#typingflow-overlay .tf-logo {
+  color: #cc785c !important;
+  font-size: 18px !important;
+  animation: tf-pulse 2.5s ease-in-out infinite !important;
+}
+
+@keyframes tf-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+#typingflow-overlay .tf-brand-name {
+  color: #cc785c !important;
+  font-family: 'SF Mono', 'Fira Code', 'Courier New', monospace !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  letter-spacing: 2px !important;
+  text-transform: uppercase !important;
+}
+
+#typingflow-overlay .tf-progress-wrap {
+  flex: 1 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+}
+
+#typingflow-overlay .tf-progress-bar {
+  flex: 1 !important;
+  height: 3px !important;
+  background: #2e2a24 !important;
+  border-radius: 2px !important;
+  overflow: hidden !important;
+}
+
+#typingflow-overlay .tf-progress-fill {
+  height: 100% !important;
+  background: linear-gradient(90deg, #cc785c, #e8a87c) !important;
+  border-radius: 2px !important;
+  transition: width 0.4s ease !important;
+  width: 0% !important;
+}
+
+#typingflow-overlay .tf-section-counter {
+  color: #6b6560 !important;
+  font-family: 'SF Mono', monospace !important;
+  font-size: 11px !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+}
+
+#typingflow-overlay .tf-close {
+  background: none !important;
+  border: 1px solid #2e2a24 !important;
+  color: #6b6560 !important;
+  cursor: pointer !important;
+  width: 28px !important;
+  height: 28px !important;
+  border-radius: 50% !important;
+  font-size: 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.2s !important;
+  flex-shrink: 0 !important;
+  padding: 0 !important;
+}
+
+#typingflow-overlay .tf-close:hover {
+  border-color: #cc785c !important;
+  color: #cc785c !important;
+}
+
+/* ── Body ── */
+#typingflow-overlay .tf-body {
+  flex: 1 !important;
+  overflow-y: auto !important;
+  padding: 40px 0 20px !important;
+  scroll-behavior: smooth !important;
+}
+
+#typingflow-overlay .tf-body::-webkit-scrollbar {
+  width: 4px !important;
+}
+
+#typingflow-overlay .tf-body::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+#typingflow-overlay .tf-body::-webkit-scrollbar-thumb {
+  background: #2e2a24 !important;
+  border-radius: 2px !important;
+}
+
+#typingflow-overlay .tf-page-title {
+  color: #3d3830 !important;
+  font-family: 'SF Mono', monospace !important;
+  font-size: 11px !important;
+  letter-spacing: 2px !important;
+  text-transform: uppercase !important;
+  margin-bottom: 32px !important;
+  padding-left: 14px !important;
+  border-left: 2px solid #2e2a24 !important;
+}
+
+#typingflow-overlay .tf-section-heading {
+  color: #cc785c !important;
+  font-size: 22px !important;
+  font-weight: 700 !important;
+  line-height: 1.3 !important;
+  margin-bottom: 28px !important;
+  font-family: 'Georgia', serif !important;
+  min-height: 10px !important;
+}
+
+#typingflow-overlay .tf-text {
+  display: inline !important;
+}
+
+#typingflow-overlay .tf-para {
+  color: #d4cfc8 !important;
+  font-size: 19px !important;
+  line-height: 1.85 !important;
+  margin: 0 0 28px 0 !important;
+  font-family: 'Georgia', 'Times New Roman', serif !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.01em !important;
+}
+
+#typingflow-overlay .tf-code {
+  color: #a8d5a2 !important;
+  font-family: 'SF Mono', 'Fira Code', 'Courier New', monospace !important;
+  font-size: 14px !important;
+  line-height: 1.7 !important;
+  background: #12100e !important;
+  border: 1px solid #2e2a24 !important;
+  border-left: 3px solid #cc785c !important;
+  border-radius: 6px !important;
+  padding: 16px 20px !important;
+  margin: 0 0 24px 0 !important;
+  white-space: pre-wrap !important;
+  word-break: break-word !important;
+}
+
+#typingflow-overlay .tf-cursor {
+  display: inline-block !important;
+  color: #cc785c !important;
+  animation: tf-blink 1s step-end infinite !important;
+  font-size: 18px !important;
+  vertical-align: middle !important;
+  margin-left: 2px !important;
+}
+
+@keyframes tf-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+#typingflow-overlay .tf-done-hint {
+  color: #3d3830 !important;
+  font-family: 'SF Mono', monospace !important;
+  font-size: 12px !important;
+  letter-spacing: 1px !important;
+  margin-top: 32px !important;
+  padding: 12px 16px !important;
+  border: 1px dashed #2e2a24 !important;
+  border-radius: 6px !important;
+  text-align: center !important;
+  animation: tf-fade-in 0.5s ease !important;
+}
+
+/* ── Controls ── */
+#typingflow-overlay .tf-controls {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 14px 0 20px !important;
+  border-top: 1px solid #2e2a24 !important;
+  flex-shrink: 0 !important;
+  flex-wrap: wrap !important;
+}
+
+#typingflow-overlay .tf-btn {
+  background: #12100e !important;
+  border: 1px solid #2e2a24 !important;
+  color: #8a847c !important;
+  padding: 7px 14px !important;
+  border-radius: 6px !important;
+  cursor: pointer !important;
+  font-size: 12px !important;
+  font-family: 'SF Mono', monospace !important;
+  letter-spacing: 0.5px !important;
+  transition: all 0.2s !important;
+  white-space: nowrap !important;
+}
+
+#typingflow-overlay .tf-btn:hover {
+  border-color: #cc785c !important;
+  color: #cc785c !important;
+}
+
+#typingflow-overlay .tf-btn-primary {
+  background: #cc785c !important;
+  border-color: #cc785c !important;
+  color: #1a1814 !important;
+  font-weight: 700 !important;
+}
+
+#typingflow-overlay .tf-btn-primary:hover {
+  background: #e8a87c !important;
+  border-color: #e8a87c !important;
+  color: #1a1814 !important;
+}
+
+#typingflow-overlay .tf-speed-wrap {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin-left: auto !important;
+}
+
+#typingflow-overlay .tf-speed-label {
+  color: #3d3830 !important;
+  font-family: 'SF Mono', monospace !important;
+  font-size: 11px !important;
+  white-space: nowrap !important;
+  min-width: 36px !important;
+}
+
+#typingflow-overlay .tf-slider {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  width: 80px !important;
+  height: 3px !important;
+  background: #2e2a24 !important;
+  border-radius: 2px !important;
+  outline: none !important;
+  cursor: pointer !important;
+}
+
+#typingflow-overlay .tf-slider::-webkit-slider-thumb {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  width: 12px !important;
+  height: 12px !important;
+  border-radius: 50% !important;
+  background: #cc785c !important;
+  cursor: pointer !important;
+}

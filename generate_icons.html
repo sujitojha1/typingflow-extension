@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head><title>Generate TypingFlow Icons</title></head>
+<body style="background:#1a1814;color:#d4cfc8;font-family:monospace;padding:30px">
+  <h2 style="color:#cc785c">Icon Generator – Click each to download</h2>
+  <p style="color:#6b6560;margin-bottom:20px">Download all four and place them in the <code>icons/</code> folder.</p>
+  <div id="canvases" style="display:flex;gap:20px;align-items:flex-end;flex-wrap:wrap"></div>
+
+  <script>
+    const sizes = [16, 32, 48, 128];
+
+    sizes.forEach(size => {
+      const canvas = document.createElement('canvas');
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext('2d');
+
+      // Background
+      ctx.fillStyle = '#1a1814';
+      ctx.fillRect(0, 0, size, size);
+
+      // Rounded rect background
+      const r = size * 0.18;
+      ctx.beginPath();
+      ctx.moveTo(r, 0);
+      ctx.lineTo(size - r, 0);
+      ctx.quadraticCurveTo(size, 0, size, r);
+      ctx.lineTo(size, size - r);
+      ctx.quadraticCurveTo(size, size, size - r, size);
+      ctx.lineTo(r, size);
+      ctx.quadraticCurveTo(0, size, 0, size - r);
+      ctx.lineTo(0, r);
+      ctx.quadraticCurveTo(0, 0, r, 0);
+      ctx.closePath();
+      ctx.fillStyle = '#1a1814';
+      ctx.fill();
+
+      // Diamond ◆ icon
+      const cx = size / 2;
+      const cy = size / 2;
+      const d = size * 0.36;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - d);
+      ctx.lineTo(cx + d * 0.7, cy);
+      ctx.lineTo(cx, cy + d);
+      ctx.lineTo(cx - d * 0.7, cy);
+      ctx.closePath();
+      ctx.fillStyle = '#cc785c';
+      ctx.fill();
+
+      // Inner diamond cutout for "frame" effect (larger sizes only)
+      if (size >= 32) {
+        const id = d * 0.55;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy - id);
+        ctx.lineTo(cx + id * 0.7, cy);
+        ctx.lineTo(cx, cy + id);
+        ctx.lineTo(cx - id * 0.7, cy);
+        ctx.closePath();
+        ctx.fillStyle = '#1a1814';
+        ctx.fill();
+
+        // Center dot
+        ctx.beginPath();
+        ctx.arc(cx, cy, size * 0.08, 0, Math.PI * 2);
+        ctx.fillStyle = '#cc785c';
+        ctx.fill();
+      }
+
+      // Wrap in a div with label
+      const wrap = document.createElement('div');
+      wrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:8px';
+
+      const label = document.createElement('div');
+      label.style.cssText = 'color:#6b6560;font-size:11px';
+      label.textContent = `${size}×${size}`;
+
+      canvas.style.cssText = `
+        cursor:pointer;
+        border:1px solid #2e2a24;
+        image-rendering:pixelated;
+        display:block;
+        width:${Math.max(size, 48)}px;
+        height:${Math.max(size, 48)}px;
+      `;
+      canvas.title = `Click to download icon${size}.png`;
+
+      canvas.addEventListener('click', () => {
+        const link = document.createElement('a');
+        link.download = `icon${size}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      });
+
+      wrap.appendChild(canvas);
+      wrap.appendChild(label);
+      document.getElementById('canvases').appendChild(wrap);
+    });
+  </script>
+</body>
+</html>
