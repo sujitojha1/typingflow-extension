@@ -2,310 +2,169 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>TypingFlow</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
-      width: 300px;
+      width: 280px;
       background: #1a1814;
       font-family: 'Georgia', serif;
       color: #d4cfc8;
-      border: 1px solid #2e2a24;
     }
 
     /* ── Header ── */
     .header {
-      padding: 20px 20px 16px;
+      padding: 18px 18px 14px;
       border-bottom: 1px solid #2e2a24;
       display: flex;
       align-items: center;
       gap: 10px;
     }
 
-    .logo {
-      color: #cc785c;
-      font-size: 22px;
-      animation: pulse 2.5s ease-in-out infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
-    }
-
-    .brand {
-      flex: 1;
-    }
+    .logo { color: #cc785c; font-size: 20px; animation: pulse 2.5s ease-in-out infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.45} }
 
     .brand-name {
-      font-family: 'SF Mono', 'Courier New', monospace;
-      font-size: 13px;
+      font-family: 'SF Mono', monospace;
+      font-size: 12px;
       font-weight: 700;
       color: #cc785c;
-      letter-spacing: 2px;
+      letter-spacing: 2.5px;
       text-transform: uppercase;
     }
 
     .brand-sub {
-      font-size: 11px;
-      color: #4a4540;
+      font-size: 10px;
+      color: #3d3830;
       font-family: 'SF Mono', monospace;
       margin-top: 2px;
+      letter-spacing: 0.5px;
     }
 
-    /* ── Status pill ── */
-    .status-pill {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      font-family: 'SF Mono', monospace;
-      font-size: 10px;
-      padding: 4px 8px;
-      border-radius: 12px;
-      border: 1px solid #2e2a24;
-      color: #4a4540;
+    .brand { flex: 1; }
+
+    .pill {
+      display: flex; align-items: center; gap: 5px;
+      font-family: 'SF Mono', monospace; font-size: 10px;
+      padding: 3px 8px; border-radius: 12px;
+      border: 1px solid #2e2a24; color: #3d3830;
     }
 
-    .status-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: #2e2a24;
+    .pill-dot {
+      width: 5px; height: 5px; border-radius: 50%; background: #2e2a24;
     }
 
-    .status-pill.active {
-      border-color: #cc785c44;
-      color: #cc785c;
-    }
-
-    .status-pill.active .status-dot {
+    .pill.on { border-color: #cc785c44; color: #cc785c; }
+    .pill.on .pill-dot {
       background: #cc785c;
-      box-shadow: 0 0 6px #cc785c88;
-      animation: blink 1.5s ease-in-out infinite;
+      box-shadow: 0 0 5px #cc785c88;
+      animation: blink 1.4s ease-in-out infinite;
     }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.25} }
 
-    @keyframes blink {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.3; }
-    }
-
-    /* ── Main action ── */
-    .main-section {
-      padding: 20px;
+    /* ── Description ── */
+    .desc {
+      padding: 14px 18px;
       border-bottom: 1px solid #2e2a24;
+      font-size: 12px;
+      line-height: 1.7;
+      color: #6b6560;
     }
+
+    .desc strong { color: #cc785c; font-weight: normal; }
+
+    /* ── Start button ── */
+    .action { padding: 16px 18px; border-bottom: 1px solid #2e2a24; }
 
     .start-btn {
       width: 100%;
-      padding: 14px;
+      padding: 13px;
       background: #cc785c;
-      border: none;
-      border-radius: 8px;
+      border: none; border-radius: 8px;
       color: #1a1814;
       font-family: 'SF Mono', monospace;
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      cursor: pointer;
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
+      font-size: 12px; font-weight: 700;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      cursor: pointer; transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
     }
 
-    .start-btn:hover {
-      background: #e8a87c;
-      transform: translateY(-1px);
-      box-shadow: 0 4px 16px #cc785c44;
-    }
+    .start-btn:hover { background: #e8a87c; transform: translateY(-1px); box-shadow: 0 4px 14px #cc785c33; }
+    .start-btn.off { background: #12100e; border: 1px solid #cc785c; color: #cc785c; }
+    .start-btn.off:hover { background: #cc785c11; }
 
-    .start-btn.stop {
-      background: #12100e;
-      border: 1px solid #cc785c;
-      color: #cc785c;
-    }
+    /* ── Shortcuts ── */
+    .shortcuts { padding: 14px 18px; }
 
-    .start-btn.stop:hover {
-      background: #cc785c11;
-    }
-
-    /* ── Settings ── */
-    .settings-section {
-      padding: 16px 20px;
-      border-bottom: 1px solid #2e2a24;
-    }
-
-    .settings-label {
+    .shortcuts-label {
       font-family: 'SF Mono', monospace;
-      font-size: 10px;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: #3d3830;
-      margin-bottom: 12px;
-    }
-
-    .setting-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      font-size: 9px; letter-spacing: 2px;
+      text-transform: uppercase; color: #2e2a24;
       margin-bottom: 10px;
     }
 
-    .setting-name {
-      font-size: 12px;
-      color: #8a847c;
-      font-family: 'SF Mono', monospace;
-    }
-
-    .slider-wrap {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    input[type="range"] {
-      -webkit-appearance: none;
-      width: 90px;
-      height: 3px;
-      background: #2e2a24;
-      border-radius: 2px;
-      outline: none;
-      cursor: pointer;
-    }
-
-    input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      background: #cc785c;
-      cursor: pointer;
-    }
-
-    .slider-val {
-      font-family: 'SF Mono', monospace;
-      font-size: 10px;
-      color: #cc785c;
-      min-width: 36px;
-      text-align: right;
-    }
-
-    /* ── Keyboard hints ── */
-    .hints {
-      padding: 14px 20px;
-    }
-
-    .hints-label {
-      font-family: 'SF Mono', monospace;
-      font-size: 10px;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: #3d3830;
-      margin-bottom: 10px;
-    }
-
-    .hint-row {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      margin-bottom: 6px;
+    .row {
+      display: flex; align-items: center; gap: 7px; margin-bottom: 7px;
     }
 
     .key {
-      font-family: 'SF Mono', monospace;
-      font-size: 10px;
-      padding: 2px 6px;
-      background: #12100e;
-      border: 1px solid #2e2a24;
-      border-radius: 4px;
-      color: #cc785c;
-      white-space: nowrap;
+      font-family: 'SF Mono', monospace; font-size: 9px;
+      padding: 2px 6px; background: #12100e;
+      border: 1px solid #2e2a24; border-radius: 4px;
+      color: #cc785c; white-space: nowrap;
     }
 
-    .hint-desc {
-      font-size: 11px;
-      color: #4a4540;
-    }
+    .desc-text { font-size: 11px; color: #3d3830; }
 
     /* ── Footer ── */
     .footer {
-      padding: 10px 20px;
-      border-top: 1px solid #2e2a24;
-      display: flex;
-      justify-content: center;
+      padding: 8px 18px;
+      border-top: 1px solid #1e1c19;
+      text-align: center;
     }
 
     .footer-text {
       font-family: 'SF Mono', monospace;
-      font-size: 9px;
-      color: #2e2a24;
-      letter-spacing: 1px;
+      font-size: 8px; color: #222; letter-spacing: 2px;
     }
   </style>
 </head>
 <body>
 
-  <!-- Header -->
   <div class="header">
     <span class="logo">◆</span>
     <div class="brand">
       <div class="brand-name">TypingFlow</div>
-      <div class="brand-sub">Focus Reader</div>
+      <div class="brand-sub">Type to Remember</div>
     </div>
-    <div class="status-pill" id="status-pill">
-      <div class="status-dot"></div>
-      <span id="status-text">OFF</span>
+    <div class="pill" id="pill">
+      <div class="pill-dot"></div>
+      <span id="pill-text">OFF</span>
     </div>
   </div>
 
-  <!-- Main Action -->
-  <div class="main-section">
+  <div class="desc">
+    Extracts <strong>key sentences</strong> from the page and makes you type them —
+    forcing active recall so content actually sticks.
+  </div>
+
+  <div class="action">
     <button class="start-btn" id="start-btn">
       <span id="btn-icon">▶</span>
-      <span id="btn-label">Start Session</span>
+      <span id="btn-label">Start Typing Session</span>
     </button>
   </div>
 
-  <!-- Settings -->
-  <div class="settings-section">
-    <div class="settings-label">Session Settings</div>
-
-    <div class="setting-row">
-      <span class="setting-name">Typing Speed</span>
-      <div class="slider-wrap">
-        <input type="range" id="speed-slider" min="5" max="120" value="30" />
-        <span class="slider-val" id="speed-val">Fast</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- Keyboard Hints -->
-  <div class="hints">
-    <div class="hints-label">Keyboard Shortcuts</div>
-    <div class="hint-row">
-      <span class="key">Space</span>
-      <span class="hint-desc">Pause / Resume</span>
-    </div>
-    <div class="hint-row">
-      <span class="key">← →</span>
-      <span class="hint-desc">Previous / Next section</span>
-    </div>
-    <div class="hint-row">
-      <span class="key">R</span>
-      <span class="hint-desc">Restart section</span>
-    </div>
-    <div class="hint-row">
-      <span class="key">Esc</span>
-      <span class="hint-desc">Exit session</span>
-    </div>
+  <div class="shortcuts">
+    <div class="shortcuts-label">During Session</div>
+    <div class="row"><span class="key">Type</span><span class="desc-text">Match text exactly — green = correct, red = wrong</span></div>
+    <div class="row"><span class="key">Tab</span><span class="desc-text">Skip current passage</span></div>
+    <div class="row"><span class="key">Esc</span><span class="desc-text">Exit session</span></div>
   </div>
 
   <div class="footer">
-    <span class="footer-text">CLAUDE · THEMED · READER</span>
+    <span class="footer-text">CLAUDE · THEMED · TYPING · SESSION</span>
   </div>
 
   <script src="popup.js"></script>
