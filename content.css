@@ -1,0 +1,174 @@
+/* Glassy Overlay for content.js */
+#tf-master-overlay {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 2147483647 !important;
+  background: rgba(15, 12, 41, 0.85) !important;
+  backdrop-filter: blur(25px) !important;
+  -webkit-backdrop-filter: blur(25px) !important;
+  color: #fff !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  display: flex !important;
+  flex-direction: column !important;
+  padding: 40px !important;
+  overflow-y: auto !important;
+  animation: tf-fade-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  box-sizing: border-box !important;
+}
+
+@keyframes tf-fade-in {
+  from { opacity: 0; transform: scale(1.03); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+#tf-close {
+  position: absolute !important;
+  top: 30px !important;
+  right: 40px !important;
+  background: rgba(255,255,255,0.05) !important;
+  border: 1px solid rgba(255,255,255,0.1) !important;
+  color: white !important;
+  border-radius: 50% !important;
+  width: 44px !important;
+  height: 44px !important;
+  cursor: pointer !important;
+  font-size: 20px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.25s !important;
+  z-index: 999 !important;
+}
+
+#tf-close:hover {
+  background: rgba(255,255,255,0.15) !important;
+  transform: scale(1.1) !important;
+}
+
+.tf-inner-wrapper {
+  max-width: 800px !important;
+  width: 100% !important;
+  margin: 0 auto !important;
+  padding: 40px 0 !important;
+}
+
+.tf-h1 {
+  text-align: center !important;
+  margin: 0 0 10px 0 !important;
+  font-size: 38px !important;
+  font-weight: 800 !important;
+  background: linear-gradient(45deg, #ff9a9e, #fecfef) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+.tf-subtitle {
+  text-align: center !important;
+  color: #aeb4c0 !important;
+  margin-bottom: 50px !important;
+  font-size: 14px !important;
+  letter-spacing: 1px !important;
+  text-transform: uppercase !important;
+}
+
+.tf-nugget-card {
+  background: rgba(255,255,255,0.04) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  padding: 30px !important;
+  border-radius: 20px !important;
+  margin-bottom: 24px !important;
+  font-size: 19px !important;
+  line-height: 1.7 !important;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.2) !important;
+  position: relative !important;
+  transition: transform 0.2s !important;
+}
+
+.tf-nugget-card:hover {
+  transform: translateY(-2px) !important;
+  background: rgba(255,255,255,0.07) !important;
+}
+
+.tf-nugget-idx {
+  display: block !important;
+  font-size: 12px !important;
+  font-weight: bold !important;
+  color: #ff9a9e !important;
+  margin-bottom: 12px !important;
+  background: rgba(255,255,255,0.1) !important;
+  padding: 4px 10px !important;
+  border-radius: 12px !important;
+  width: fit-content !important;
+}
+
+/* Typing Mode */
+.tf-typing-container {
+  max-width: 800px !important;
+  margin: 15vh auto 0 auto !important;
+  width: 100% !important;
+}
+
+.tf-typing-header {
+  color: #ff9a9e !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  letter-spacing: 2px !important;
+  text-transform: uppercase !important;
+  margin-bottom: 30px !important;
+  background: rgba(255,154,158,0.15) !important;
+  display: inline-block !important;
+  padding: 6px 16px !important;
+  border-radius: 20px !important;
+}
+
+.tf-target {
+  font-size: clamp(24px, 3.5vw, 36px) !important;
+  line-height: 1.6 !important;
+  color: rgba(255,255,255,0.3) !important;
+  font-family: 'Georgia', serif !important;
+}
+
+.tf-char.correct {
+  color: #4ade80 !important;
+  text-shadow: 0 0 16px rgba(74, 222, 128, 0.4) !important;
+}
+
+.tf-char.wrong {
+  color: #f87171 !important;
+  background: rgba(248, 113, 113, 0.2) !important;
+  border-radius: 4px !important;
+}
+
+.tf-char.cursor {
+  color: #fff !important;
+  border-bottom: 3px solid #ff9a9e !important;
+  animation: tf-cursor-blink 1s infinite step-end !important;
+}
+
+@keyframes tf-cursor-blink {
+  50% { border-color: transparent; }
+}
+
+.tf-input-hidden {
+  opacity: 0 !important;
+  position: absolute !important;
+  top: -9999px !important;
+}
+
+.tf-action-btn {
+  background: linear-gradient(45deg, #ff9a9e, #fecfef) !important;
+  border: none !important;
+  padding: 14px 40px !important;
+  border-radius: 12px !important;
+  color: #0f0c29 !important;
+  font-weight: 800 !important;
+  font-size: 14px !important;
+  letter-spacing: 2px !important;
+  cursor: pointer !important;
+  margin-top: 30px !important;
+  transition: transform 0.2s !important;
+}
+
+.tf-action-btn:hover {
+  transform: scale(1.05) !important;
+}
