@@ -139,6 +139,7 @@ function renderTypingChallenge() {
 function saveAsHTML() {
   if (nuggets.length === 0) extractNuggets();
   const date = new Date().toLocaleDateString();
+  const cardsHtml = nuggets.map((n, i) => '<div class="card"><div class="chip">#' + (i+1) + '</div><div>' + n + '</div></div>').join('');
   let htmlContent = `<!DOCTYPE html>
 <html>
 <head>
@@ -157,7 +158,7 @@ function saveAsHTML() {
   <div class="container">
     <h1>Distilled Nuggets</h1>
     <div class="meta">Extracted on ${date}</div>
-    ${nuggets.map((n, i) => `<div class="card"><div class="chip">#${i+1}</div><div>${n}</div></div>`).join('')}
+    ${cardsHtml}
   </div>
 </body>
 </html>`;
