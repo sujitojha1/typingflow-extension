@@ -3,17 +3,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnType = document.getElementById('btn-type');
   const btnSave = document.getElementById('btn-save');
 
-  // Ping the content script to see if nuggets already exist
-  chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
-    if (!tabs[0]) return;
-    chrome.tabs.sendMessage(tabs[0].id, {action: "ping"}, (resp) => {
-      // If we receive a response and nuggets exist, enable the secondary buttons
-      if (resp && resp.hasNuggets) {
-        enableButtons();
-      }
-    });
-  });
-
   function enableButtons() {
     btnType.classList.remove('disabled');
     btnType.disabled = false;
@@ -21,13 +10,43 @@ document.addEventListener('DOMContentLoaded', () => {
     btnSave.disabled = false;
   }
 
+  function sendMessageWithInjection(tabId, msg, callback) {
+    chrome.tabs.sendMessage(tabId, msg, (resp) => {
+      if (chrome.runtime.lastError) {
+        // The content script isn't running on this tab yet, let's inject it.
+        chrome.scripting.executeScript({
+          target: { tabId: tabId },
+          files: ['content.js']
+        }).then(() => {
+          return chrome.scripting.insertCSS({
+            target: { tabId: tabId },
+            files: ['content.css']
+          });
+        }).then(() => {
+          // Retry the internal message after successful injection
+          chrome.tabs.sendMessage(tabId, msg, callback);
+        }).catch(err => console.error("Injection failed: ", err));
+      } else if (callback) {
+        callback(resp);
+      }
+    });
+  }
+
+  // Check state on load
+  chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
+    if (!tabs[0]) return;
+    sendMessageWithInjection(tabs[0].id, {action: "ping"}, (resp) => {
+      if (resp && resp.hasNuggets) {
+        enableButtons();
+      }
+    });
+  });
+
   // Button 1: Beautify
   btnBeautify.addEventListener('click', () => {
     chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
-      chrome.tabs.sendMessage(tabs[0].id, {action: "beautify"}, (resp) => {
-        if (resp && resp.success) {
-          enableButtons();
-        }
+      sendMessageWithInjection(tabs[0].id, {action: "beautify"}, (resp) => {
+        if (resp && resp.success) enableButtons();
       });
     });
   });
@@ -35,14 +54,14 @@ document.addEventListener('DOMContentLoaded', () => {
   // Button 2: Typing Flow
   btnType.addEventListener('click', () => {
     chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
-      chrome.tabs.sendMessage(tabs[0].id, {action: "type"});
+      sendMessageWithInjection(tabs[0].id, {action: "type"});
     });
   });
 
   // Button 3: Save HTML
   btnSave.addEventListener('click', () => {
     chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
-      chrome.tabs.sendMessage(tabs[0].id, {action: "save"});
+      sendMessageWithInjection(tabs[0].id, {action: "save"});
     });
   });
 });

@@ -157,7 +157,7 @@ function saveAsHTML() {
   <div class="container">
     <h1>Distilled Nuggets</h1>
     <div class="meta">Extracted on ${date}</div>
-    ${nuggets.map((n, i) => \`<div class="card"><div class="chip">#\${i+1}</div><div>\${n}</div></div>\`).join('')}
+    ${nuggets.map((n, i) => `<div class="card"><div class="chip">#${i+1}</div><div>${n}</div></div>`).join('')}
   </div>
 </body>
 </html>`;
@@ -166,7 +166,7 @@ function saveAsHTML() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = \`TypingFlow_Nuggets_\${Date.now()}.html\`;
+  a.download = `TypingFlow_Nuggets_${Date.now()}.html`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);

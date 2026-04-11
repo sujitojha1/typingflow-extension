@@ -30,8 +30,4 @@ TypingFlow is being built with a relentless focus on visual excellence:
 ---
 
 ## 📝 Development Roadmap
-- [ ] Project scaffolding and Manifest V3 setup.
-- [ ] Content extraction engine to accurately identify key "nuggets".
-- [ ] Injectable glassmorphism UI layer for Button 1.
-- [ ] Typing validation logic character-by-character for Button 2.
-- [ ] Blob/HTML generation and download logic for Button 3.
+The project checklist has been moved to [DEVELOPMENT_ROADMAP.md](DEVELOPMENT_ROADMAP.md).
