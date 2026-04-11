@@ -208,7 +208,7 @@ function handleInput(e) {
   if (!startTime && typed.length > 0) {
     startTime = Date.now();
     const timerStart = Date.now();
-    timerInterval = setInterval(() => updateLiveStats(typed.length, wrongCount), 500);
+    timerInterval = setInterval(() => updateLiveStats(totalTyped, wrongCount), 500);
   }
 
   // Update span states
@@ -285,14 +285,18 @@ function onChunkDone() {
 
 function showComplete() {
   document.getElementById('tf-complete').style.display = 'flex';
-  const avgWpm = Math.round(sessionWpms.reduce((a,b)=>a+b,0)/Math.max(1,sessionWpms.length));
-  const avgAcc = Math.round(sessionAccs.reduce((a,b)=>a+b,0)/Math.max(1,sessionAccs.length));
-  document.getElementById('tf-c-scores').innerHTML = `
-    <div class="tf-c-card"><div class="tf-c-val">${avgWpm}</div><div class="tf-c-lbl">Avg WPM</div></div>
-    <div class="tf-c-card"><div class="tf-c-val">${avgAcc}%</div><div class="tf-c-lbl">Accuracy</div></div>
-    <div class="tf-c-card"><div class="tf-c-val">${chunkIndex}</div><div class="tf-c-lbl">Passages</div></div>
+  const scoresContainer = document.getElementById('tf-c-scores');
+  scoresContainer.style.display = 'block';
+  scoresContainer.style.textAlign = 'center';
+  scoresContainer.style.marginBottom = '32px';
+  scoresContainer.innerHTML = `
+    <div style="font-family: 'SF Mono', monospace; font-size: 13px; color: #6b6560; letter-spacing: 1px;">
+      You typed ${chunkIndex} key passages
+    </div>
   `;
-  document.getElementById('tf-c-btn').addEventListener('click', closeSession);
+  const btn = document.getElementById('tf-c-btn');
+  btn.textContent = 'DONE';
+  btn.addEventListener('click', closeSession);
 }
 
 // ─── Keys ─────────────────────────────────────────────────────────────────────
