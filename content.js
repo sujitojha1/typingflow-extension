@@ -95,10 +95,13 @@ function renderTypingChallenge() {
     return;
   }
 
-  const text = nuggets[typingIndex].replace(/\\s+/g, ' '); // normalize spaces
+  const text = nuggets[typingIndex].replace(/\s+/g, ' '); // normalize spaces
   let html = `<button id="tf-close">✕</button>
     <div class="tf-typing-container">
-      <div class="tf-typing-header">Nugget ${typingIndex + 1} of ${nuggets.length}</div>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 30px;">
+        <div class="tf-typing-header" style="margin-bottom:0;">Nugget ${typingIndex + 1} of ${nuggets.length}</div>
+        <button id="tf-skip-btn" style="background:none; border:none; color:#D97757; font-size:13px; font-weight:600; cursor:pointer; text-transform:uppercase; letter-spacing:1px; font-family:inherit;">Skip ➔</button>
+      </div>
       <div id="tf-target" class="tf-target">`;
   
   for(let i=0; i<text.length; i++) {
@@ -120,6 +123,10 @@ function renderTypingChallenge() {
   document.getElementById('tf-master-overlay').addEventListener('click', () => input.focus());
 
   document.getElementById('tf-close').addEventListener('click', removeOverlay);
+  document.getElementById('tf-skip-btn').addEventListener('click', () => {
+    typingIndex++;
+    renderTypingChallenge();
+  });
 
   // Prevent pasting to artificially bypass
   input.addEventListener('paste', e => e.preventDefault());
