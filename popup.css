@@ -1,24 +1,22 @@
 body {
   margin: 0;
   width: 300px;
-  background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  color: white;
+  background: #2A2926; /* Claude dark theme */
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  color: #ECEBDE;
   padding: 16px;
   display: flex;
   justify-content: center;
 }
 
 .glass-container {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
+  background: #32302E;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
   padding: 24px;
   width: 100%;
   box-sizing: border-box;
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -26,42 +24,40 @@ body {
 
 .header h1 {
   margin: 0;
-  font-size: 24px;
-  font-weight: 800;
-  background: linear-gradient(45deg, #ff9a9e, #fecfef);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  font-size: 22px;
+  font-weight: 500;
+  color: #ECEBDE;
+  font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
 }
 
 .header p {
-  margin: 4px 0 12px;
+  margin: 4px 0 16px;
   font-size: 11px;
-  color: #aeb4c0;
+  color: #9A958E;
   text-transform: uppercase;
   letter-spacing: 1px;
 }
 
 .glass-btn {
-  background: rgba(255, 255, 255, 0.07);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #3A3834;
+  border: 1px solid rgba(255, 255, 255, 0.06);
   padding: 14px;
-  border-radius: 12px;
-  color: white;
-  font-size: 14px;
-  font-weight: 600;
+  border-radius: 8px;
+  color: #ECEBDE;
+  font-size: 13px;
+  font-weight: 500;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 12px;
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
 .glass-btn:hover:not(.disabled) {
-  background: rgba(255, 255, 255, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  background: #44413D;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  transform: translateY(-1px);
 }
 
 .glass-btn:active:not(.disabled) {
@@ -71,10 +67,11 @@ body {
 .glass-btn.disabled {
   opacity: 0.4;
   cursor: not-allowed;
-  background: rgba(0,0,0,0.2);
+  background: rgba(0,0,0,0.1);
   border-color: transparent;
 }
 
 .icon {
-  font-size: 18px;
+  font-size: 16px;
+  opacity: 0.8;
 }

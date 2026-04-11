@@ -2,6 +2,8 @@ let nuggets = [];
 let overlay = null;
 let mode = 'none';
 let typingIndex = 0;
+let typingStartTime = 0;
+let totalCharsTyped = 0;
 
 function extractNuggets() {
   const pTags = Array.from(document.querySelectorAll('p'))
@@ -56,16 +58,36 @@ function showTyping() {
   createOverlay();
   mode = 'type';
   typingIndex = 0;
+  typingStartTime = Date.now();
+  totalCharsTyped = 0;
   renderTypingChallenge();
 }
 
 function renderTypingChallenge() {
   if (typingIndex >= nuggets.length) {
+    const elapsedSec = Math.floor((Date.now() - typingStartTime) / 1000);
+    const wpm = elapsedSec > 0 ? Math.round((totalCharsTyped / 5) / (elapsedSec / 60)) : 0;
     overlay.innerHTML = `
       <button id="tf-close">✕</button>
-      <div class="tf-inner-wrapper" style="text-align:center; transform: translateY(40vh);">
-        <h1 class="tf-h1" style="font-size: 40px;">Typing Complete!</h1>
-        <p style="color: #aeb4c0; font-size: 18px;">You've actively engaged with all the nuggets.</p>
+      <div class="tf-inner-wrapper" style="text-align:center; transform: translateY(30vh);">
+        <h1 class="tf-h1" style="font-size: 40px; margin-bottom: 5px;">Typing Complete!</h1>
+        <p style="color: #9A958E; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">You've actively engaged with all the nuggets.</p>
+        
+        <div class="tf-stats">
+          <div class="tf-stat-box">
+             <div class="tf-stat-val">${elapsedSec}s</div>
+             <div class="tf-stat-label">Time Spent</div>
+          </div>
+          <div class="tf-stat-box">
+             <div class="tf-stat-val">${totalCharsTyped}</div>
+             <div class="tf-stat-label">Characters</div>
+          </div>
+          <div class="tf-stat-box">
+             <div class="tf-stat-val">${wpm}</div>
+             <div class="tf-stat-label">WPM</div>
+          </div>
+        </div>
+
         <button id="tf-done-btn" class="tf-action-btn">DONE</button>
       </div>`;
     document.getElementById('tf-close').addEventListener('click', removeOverlay);
@@ -129,6 +151,7 @@ function renderTypingChallenge() {
 
     if (typed.length === text.length && allCorrect) {
       setTimeout(() => {
+        totalCharsTyped += text.length;
         typingIndex++;
         renderTypingChallenge();
       }, 400); // short delay to show the final green character
@@ -146,12 +169,12 @@ function saveAsHTML() {
   <meta charset="utf-8">
   <title>TypingFlow Saved Nuggets</title>
   <style>
-    body { font-family: -apple-system, sans-serif; background: #0f0c29; background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); color: white; padding: 60px 20px; line-height: 1.6; min-height: 100vh; margin: 0; }
-    .container { max-width: 800px; margin: auto; }
-    .card { background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); padding: 30px; border-radius: 16px; margin-bottom: 24px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.3); font-size: 18px; }
-    h1 { color: #ff9a9e; font-size: 36px; margin-bottom: 5px;}
-    .meta { color: #aeb4c0; margin-bottom: 40px; text-transform: uppercase; letter-spacing: 1px; font-size: 12px; }
-    .chip { display: inline-block; padding: 4px 10px; background: rgba(255,255,255,0.1); border-radius: 20px; font-size: 12px; font-weight: bold; margin-bottom: 15px; color: #ff9a9e; }
+    body { font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif; background: #2A2926; color: #ECEBDE; padding: 60px 20px; line-height: 1.6; min-height: 100vh; margin: 0; }
+    .container { max-width: 760px; margin: auto; }
+    .card { background: #32302E; padding: 30px 40px; border-radius: 12px; margin-bottom: 24px; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 4px 12px rgba(0,0,0,0.1); font-size: 18px; }
+    h1 { color: #ECEBDE; font-size: 32px; margin-bottom: 5px; font-family: ui-sans-serif, system-ui, sans-serif;}
+    .meta { color: #9A958E; margin-bottom: 40px; text-transform: uppercase; letter-spacing: 1px; font-size: 12px; font-family: ui-sans-serif, system-ui, sans-serif;}
+    .chip { display: inline-block; font-family: ui-sans-serif, system-ui, sans-serif; font-size: 11px; font-weight: 600; color: #D97757; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; }
   </style>
 </head>
 <body>
