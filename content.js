@@ -1,13 +1,13 @@
 // TypingFlow – Content Script
 
-let sessionActive = false;
-let overlay = null;
-let chunks = [];
-let chunkIndex = 0;
-let wrongCount = 0;
-let totalTyped = 0;
-let startTime = null;
-let timerInterval = null;
+var sessionActive = false;
+var overlay = null;
+var chunks = [];
+var chunkIndex = 0;
+var wrongCount = 0;
+var totalTyped = 0;
+var startTime = null;
+var timerInterval = null;
 
 // ─── Content Extraction ───────────────────────────────────────────────────────
 
@@ -251,7 +251,7 @@ function updateLiveStats(typed, errors) {
   document.getElementById('tf-acc').textContent  = `${acc}%`;
 }
 
-let sessionWpms = [], sessionAccs = [];
+var sessionWpms = [], sessionAccs = [];
 
 function onChunkDone() {
   const input = document.getElementById('tf-input');
@@ -329,7 +329,10 @@ function openSession() {
   document.body.appendChild(overlay);
 
   document.getElementById('tf-exit').addEventListener('click', closeSession);
-  document.getElementById('tf-input').addEventListener('input', handleInput);
+  const tfInput = document.getElementById('tf-input');
+  tfInput.addEventListener('input', handleInput);
+  tfInput.addEventListener('paste', (e) => e.preventDefault());
+  tfInput.addEventListener('drop', (e) => e.preventDefault());
   document.addEventListener('keydown', handleKey);
 
   loadChunk(0);
@@ -343,7 +346,10 @@ function closeSession() {
   document.removeEventListener('keydown', handleKey);
 }
 
-chrome.runtime.onMessage.addListener((msg) => {
-  if (msg.action === 'open')  openSession();
-  if (msg.action === 'close') closeSession();
-});
+if (!window.tfListenerAdded) {
+  window.tfListenerAdded = true;
+  chrome.runtime.onMessage.addListener((msg) => {
+    if (msg.action === 'open')  openSession();
+    if (msg.action === 'close') closeSession();
+  });
+}

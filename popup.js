@@ -35,6 +35,11 @@ function sendToPage(msg) {
       chrome.scripting.executeScript({
         target: { tabId: tabs[0].id },
         files: ['content.js'],
+      }).then(() => {
+        return chrome.scripting.insertCSS({
+          target: { tabId: tabs[0].id },
+          files: ['typing-session.css'],
+        });
       }).then(() => chrome.tabs.sendMessage(tabs[0].id, msg));
     });
   });
