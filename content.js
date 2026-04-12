@@ -11,7 +11,7 @@ function extractNuggets() {
   
   for (let p of pTags) {
     const text = p.innerText.trim();
-    if (text.length > 50 && text.length < 350) {
+    if (text.length > 50 && text.length < 1500) {
       let imgNode = p.closest('section, article, figure, .content, div')?.querySelector('img') || p.previousElementSibling?.querySelector('img');
       if (!imgNode && p.previousElementSibling?.tagName === 'IMG') {
         imgNode = p.previousElementSibling;
@@ -60,12 +60,19 @@ function showBeautified() {
   `;
   nuggets.forEach((n, i) => {
     let imgHtml = n.image ? `<img src="${n.image}" style="max-width:100%; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" />` : '';
-    html += `<div class="tf-nugget-card"><span class="tf-nugget-idx">#${i+1}</span>${imgHtml}<div style="white-space:pre-wrap;">${n.text}</div></div>`;
+    html += `<div class="tf-nugget-card tf-clickable-card" data-idx="${i}" style="cursor: pointer;" title="Click to start typing this nugget"><span class="tf-nugget-idx">#${i+1}</span>${imgHtml}<div style="white-space:pre-wrap;">${n.text}</div></div>`;
   });
   html += `</div>`;
   overlay.innerHTML = html;
 
   document.getElementById('tf-close').addEventListener('click', removeOverlay);
+  document.querySelectorAll('.tf-clickable-card').forEach(card => {
+    card.addEventListener('click', (e) => {
+      typingIndex = parseInt(e.currentTarget.getAttribute('data-idx'));
+      mode = 'type';
+      renderTypingChallenge();
+    });
+  });
 }
 
 function showTyping() {
