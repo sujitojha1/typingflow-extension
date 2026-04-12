@@ -38,3 +38,9 @@
 - [x] Codebase successfully loads unpackaged in Chrome extensions suite.
 - [ ] Cross-browser / multi-layout compatibility testing.
 - [ ] Zip compression and preparation for the Chrome Web Store. 
+
+## Phase 5: "Claude Terminal" UI Upgrade (Planned Iteration)
+- [ ] Overhaul existing interactive dashboard to resemble a physical "Computer Screen / Terminal" layout.
+- [ ] Implement dark, sophisticated console panels resembling the Claude developer terminal aesthetics.
+- [ ] Design a faux "terminal window" chrome (e.g., mock minimize, maximize, and close window dots) mapping around the active typing nuggets.
+- [ ] Modify prompt elements, metrics, and progress bars to emulate CLI text readouts and active console cursors.

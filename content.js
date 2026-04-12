@@ -6,14 +6,28 @@ let typingStartTime = 0;
 let totalCharsTyped = 0;
 
 function extractNuggets() {
-  const pTags = Array.from(document.querySelectorAll('p'))
-    .map(p => p.innerText.trim())
-    .filter(text => text.length > 50 && text.length < 350);
+  nuggets = [];
+  const pTags = Array.from(document.querySelectorAll('p'));
+  
+  for (let p of pTags) {
+    const text = p.innerText.trim();
+    if (text.length > 50 && text.length < 350) {
+      let imgNode = p.closest('section, article, figure, .content, div')?.querySelector('img') || p.previousElementSibling?.querySelector('img');
+      if (!imgNode && p.previousElementSibling?.tagName === 'IMG') {
+        imgNode = p.previousElementSibling;
+      }
+      let imgSrc = imgNode ? imgNode.src : null;
+      if (imgNode && (imgNode.width > 0 && imgNode.width < 50)) {
+        imgSrc = null; // discard tiny icons if size is calculable
+      }
+      
+      nuggets.push({ text: text, image: imgSrc });
+      if (nuggets.length >= 8) break;
+    }
+  }
 
-  // Take the best paragraphs as nuggets
-  nuggets = pTags.slice(0, 8);
   if(nuggets.length === 0) {
-    nuggets = ["No substantial content could be extracted from this page."];
+    nuggets = [{ text: "No substantial content could be extracted from this page.", image: null }];
   }
   return nuggets;
 }
@@ -45,7 +59,8 @@ function showBeautified() {
       <p class="tf-subtitle">Distilled pieces of information from this page</p>
   `;
   nuggets.forEach((n, i) => {
-    html += `<div class="tf-nugget-card"><span class="tf-nugget-idx">#${i+1}</span>${n}</div>`;
+    let imgHtml = n.image ? `<img src="${n.image}" style="max-width:100%; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" />` : '';
+    html += `<div class="tf-nugget-card"><span class="tf-nugget-idx">#${i+1}</span>${imgHtml}<div style="white-space:pre-wrap;">${n.text}</div></div>`;
   });
   html += `</div>`;
   overlay.innerHTML = html;
@@ -95,8 +110,12 @@ function renderTypingChallenge() {
     return;
   }
 
-  const text = nuggets[typingIndex].replace(/\s+/g, ' '); // normalize spaces
+  const nugget = nuggets[typingIndex];
+  const text = nugget.text.replace(/\s+/g, ' '); // normalize spaces
   let nuggetStartTime = Date.now();
+  
+  let imgHtml = nugget.image ? `<div style="text-align:center; margin-bottom: 25px;"><img src="${nugget.image}" style="max-height: 200px; max-width: 100%; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" /></div>` : '';
+
   let html = `<button id="tf-close">✕</button>
     <div class="tf-typing-container">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px;">
@@ -111,6 +130,7 @@ function renderTypingChallenge() {
         </div>
       </div>
       <div class="tf-typing-header" style="margin-bottom: 30px;">Nugget ${typingIndex + 1} of ${nuggets.length}</div>
+      ${imgHtml}
       <div id="tf-target" class="tf-target">`;
   
   for(let i=0; i<text.length; i++) {
@@ -201,7 +221,10 @@ function renderTypingChallenge() {
 function saveAsHTML() {
   if (nuggets.length === 0) extractNuggets();
   const date = new Date().toLocaleDateString();
-  const cardsHtml = nuggets.map((n, i) => '<div class="card"><div class="chip">#' + (i+1) + '</div><div>' + n + '</div></div>').join('');
+  const cardsHtml = nuggets.map((n, i) => {
+    let imgHtml = n.image ? `<img src="${n.image}" style="max-width:100%; border-radius: 8px; margin-bottom: 20px;" />` : '';
+    return `<div class="card"><div class="chip">#${i+1}</div>${imgHtml}<div style="white-space:pre-wrap;">${n.text}</div></div>`;
+  }).join('');
   let htmlContent = `<!DOCTYPE html>
 <html>
 <head>
