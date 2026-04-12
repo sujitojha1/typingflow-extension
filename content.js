@@ -159,6 +159,13 @@ function renderTypingChallenge() {
     if (typed.length === text.length && allCorrect) {
       setTimeout(() => {
         totalCharsTyped += text.length;
+        
+        // Save to global tracker
+        chrome.storage.local.get(['lifetimeChars'], (res) => {
+          let chars = (res.lifetimeChars || 0) + text.length;
+          chrome.storage.local.set({lifetimeChars: chars});
+        });
+
         typingIndex++;
         renderTypingChallenge();
       }, 400); // short delay to show the final green character
@@ -222,4 +229,19 @@ if (!window.tfContentInitialized) {
       sendResponse({ success: true });
     }
   });
+
+  // Time tracker for this domain
+  let activeSeconds = 0;
+  setInterval(() => {
+    if (document.visibilityState === 'visible') {
+      activeSeconds++;
+      if (activeSeconds % 60 === 0) {
+        const domain = window.location.hostname;
+        chrome.storage.local.get([domain], (res) => {
+          let mins = (res[domain] || 0) + 1;
+          chrome.storage.local.set({[domain]: mins});
+        });
+      }
+    }
+  }, 1000);
 }

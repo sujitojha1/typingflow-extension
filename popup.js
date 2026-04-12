@@ -35,6 +35,17 @@ document.addEventListener('DOMContentLoaded', () => {
   // Check state on load
   chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
     if (!tabs[0]) return;
+    
+    // Quick load metrics
+    try {
+      const url = new URL(tabs[0].url);
+      const domain = url.hostname;
+      chrome.storage.local.get(['lifetimeChars', domain], (res) => {
+        document.getElementById('m-chars').innerText = res.lifetimeChars || 0;
+        document.getElementById('m-time').innerText = (res[domain] || 0) + 'm';
+      });
+    } catch(e){}
+
     sendMessageWithInjection(tabs[0].id, {action: "ping"}, (resp) => {
       if (resp && resp.hasNuggets) {
         enableButtons();

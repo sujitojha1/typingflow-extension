@@ -75,3 +75,32 @@ body {
   font-size: 16px;
   opacity: 0.8;
 }
+
+.metrics {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 16px;
+}
+
+.metric {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+
+.m-val {
+  font-size: 18px;
+  font-weight: 700;
+  color: #ECEBDE;
+  margin-bottom: 2px;
+}
+
+.m-label {
+  font-size: 10px;
+  color: #9A958E;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
