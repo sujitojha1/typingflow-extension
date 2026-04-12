@@ -111,7 +111,7 @@
 .tf-target {
   font-size: clamp(20px, 3vw, 28px) !important;
   line-height: 1.6 !important;
-  color: rgba(236, 235, 222, 0.4) !important; 
+  color: #7A7570 !important; 
   font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif !important;
   white-space: pre-wrap !important;
   word-break: break-word !important;
@@ -129,8 +129,10 @@
 }
 
 .tf-char.cursor {
-  color: #ECEBDE !important;
+  color: #D97757 !important;
+  background: rgba(217, 119, 87, 0.08) !important;
   border-bottom: 2px solid #D97757 !important;
+  border-radius: 2px 2px 0 0 !important;
 }
 
 .tf-input-hidden {

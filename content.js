@@ -96,12 +96,21 @@ function renderTypingChallenge() {
   }
 
   const text = nuggets[typingIndex].replace(/\s+/g, ' '); // normalize spaces
+  let nuggetStartTime = Date.now();
   let html = `<button id="tf-close">✕</button>
     <div class="tf-typing-container">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 30px;">
-        <div class="tf-typing-header" style="margin-bottom:0;">Nugget ${typingIndex + 1} of ${nuggets.length}</div>
-        <button id="tf-skip-btn" style="background:none; border:none; color:#D97757; font-size:13px; font-weight:600; cursor:pointer; text-transform:uppercase; letter-spacing:1px; font-family:inherit;">Skip ➔</button>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px;">
+        <div style="display:flex; gap: 15px;">
+          <button id="tf-prev-btn" style="background:none; border:none; color:#9A958E; font-size:12px; font-weight:600; cursor:${typingIndex === 0 ? 'not-allowed' : 'pointer'}; text-transform:uppercase; letter-spacing:1px; font-family:inherit; opacity: ${typingIndex === 0 ? 0.4 : 1};">⬅ Prev</button>
+          <button id="tf-next-btn" style="background:none; border:none; color:#D97757; font-size:12px; font-weight:600; cursor:pointer; text-transform:uppercase; letter-spacing:1px; font-family:inherit;">Next ➔</button>
+        </div>
+        <div style="color: #9A958E; font-size: 13px; font-family: ui-sans-serif, system-ui, sans-serif; font-weight: 500;">
+          <span id="tf-live-wpm" style="display:inline-block; width:65px">0 WPM</span> • 
+          <span id="tf-live-acc" style="display:inline-block; width:75px">100% ACC</span> • 
+          <span id="tf-live-prog" style="color: #D97757;">0/${text.length}</span>
+        </div>
       </div>
+      <div class="tf-typing-header" style="margin-bottom: 30px;">Nugget ${typingIndex + 1} of ${nuggets.length}</div>
       <div id="tf-target" class="tf-target">`;
   
   for(let i=0; i<text.length; i++) {
@@ -123,9 +132,15 @@ function renderTypingChallenge() {
   document.getElementById('tf-master-overlay').addEventListener('click', () => input.focus());
 
   document.getElementById('tf-close').addEventListener('click', removeOverlay);
-  document.getElementById('tf-skip-btn').addEventListener('click', () => {
+  document.getElementById('tf-next-btn').addEventListener('click', () => {
     typingIndex++;
     renderTypingChallenge();
+  });
+  document.getElementById('tf-prev-btn').addEventListener('click', () => {
+    if (typingIndex > 0) {
+      typingIndex--;
+      renderTypingChallenge();
+    }
   });
 
   // Prevent pasting to artificially bypass
@@ -142,6 +157,7 @@ function renderTypingChallenge() {
     }
 
     let allCorrect = true;
+    let errors = 0;
     spans.forEach((span, i) => {
       span.className = 'tf-char';
       if (i < typed.length) {
@@ -149,12 +165,21 @@ function renderTypingChallenge() {
           span.classList.add('correct');
         } else {
           span.classList.add('wrong');
+          errors++;
           allCorrect = false;
         }
       } else if (i === typed.length) {
         span.classList.add('cursor');
       }
     });
+
+    // Update live metrics
+    const timeElapsedMins = (Date.now() - nuggetStartTime) / 60000;
+    const wpm = timeElapsedMins > 0 ? Math.round((typed.length / 5) / timeElapsedMins) : 0;
+    const acc = typed.length > 0 ? Math.round(((typed.length - errors) / typed.length) * 100) : 100;
+    document.getElementById('tf-live-prog').innerText = `${typed.length}/${text.length}`;
+    document.getElementById('tf-live-wpm').innerText = `${wpm} WPM`;
+    document.getElementById('tf-live-acc').innerText = `${acc}% ACC`;
 
     if (typed.length === text.length && allCorrect) {
       setTimeout(() => {
