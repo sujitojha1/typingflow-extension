@@ -44,12 +44,12 @@
 ## Phase 5: "Claude Terminal" UI Upgrade
 - [x] Overhaul existing interactive dashboard shifting away from vibrant gradients into a structured dark console array.
 - [x] Implement sophisticated monochrome backgrounds (`#2A2926`) mimicking native Claude developer styling.
-- [ ] Design a faux "terminal window" chrome (e.g., mock minimize, maximize, and close window dots) mapping around the active typing nuggets.
+- [x] Design a faux "terminal window" chrome (e.g., mock minimize, maximize, and close window dots) mapping around the active typing nuggets.
 - [x] Modify prompt elements, metrics, and active character highlights to emulate precise CLI text readouts.
 
 ## Phase 6: Final Polish & Deployment
 - [x] Clean up Javascript syntax edge-cases (template literal escaping).
 - [x] Generate, compile, and route persistent `.png` UI icons into local payload directories.
 - [x] Codebase successfully loads unpackaged locally.
-- [ ] Cross-browser compilation and execution testing.
-- [ ] Zip compression and formal staging for Chrome Web Store distribution.
+- [x] Cross-browser compilation and execution testing.
+- [x] Zip compression and formal staging for Chrome Web Store distribution.

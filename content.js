@@ -60,7 +60,12 @@ function showBeautified() {
   `;
   nuggets.forEach((n, i) => {
     let imgHtml = n.image ? `<img src="${n.image}" style="max-width:100%; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" />` : '';
-    html += `<div class="tf-nugget-card tf-clickable-card" data-idx="${i}" style="cursor: pointer;" title="Click to start typing this nugget"><span class="tf-nugget-idx">#${i+1}</span>${imgHtml}<div style="white-space:pre-wrap;">${n.text}</div></div>`;
+    let mockDots = `<div style="display:flex; gap: 6px; position:absolute; top: 12px; left: 15px;">
+        <div style="width: 10px; height: 10px; border-radius: 50%; background: #ED655A;"></div>
+        <div style="width: 10px; height: 10px; border-radius: 50%; background: #E1C04C;"></div>
+        <div style="width: 10px; height: 10px; border-radius: 50%; background: #72BE47;"></div>
+      </div>`;
+    html += `<div class="tf-nugget-card tf-clickable-card" data-idx="${i}" style="cursor: pointer; padding-top: 35px;" title="Click to start typing this nugget">${mockDots}<span class="tf-nugget-idx">#${i+1}</span>${imgHtml}<div style="white-space:pre-wrap;">${n.text}</div></div>`;
   });
   html += `</div>`;
   overlay.innerHTML = html;
@@ -126,7 +131,12 @@ function renderTypingChallenge() {
   let html = `<button id="tf-close">✕</button>
     <div class="tf-typing-container">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px;">
-        <div style="display:flex; gap: 15px;">
+        <div style="display:flex; gap: 6px; align-items:center; margin-right: 25px;">
+          <div style="width: 10px; height: 10px; border-radius: 50%; background: #ED655A;"></div>
+          <div style="width: 10px; height: 10px; border-radius: 50%; background: #E1C04C;"></div>
+          <div style="width: 10px; height: 10px; border-radius: 50%; background: #72BE47;"></div>
+        </div>
+        <div style="display:flex; gap: 15px; flex: 1;">
           <button id="tf-prev-btn" style="background:none; border:none; color:#9A958E; font-size:12px; font-weight:600; cursor:${typingIndex === 0 ? 'not-allowed' : 'pointer'}; text-transform:uppercase; letter-spacing:1px; font-family:inherit; opacity: ${typingIndex === 0 ? 0.4 : 1};">⬅ Prev</button>
           <button id="tf-next-btn" style="background:none; border:none; color:#D97757; font-size:12px; font-weight:600; cursor:pointer; text-transform:uppercase; letter-spacing:1px; font-family:inherit;">Next ➔</button>
         </div>
