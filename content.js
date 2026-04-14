@@ -36,7 +36,7 @@ function extractNuggets() {
       // 3. Fallback to generated static placeholder
       if (!imgSrc) {
         if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getURL) {
-          const placeholderId = Math.floor(Math.random() * 3) + 1;
+          const placeholderId = Math.floor(Math.random() * 4) + 1;
           imgSrc = chrome.runtime.getURL(`icons/placeholders/${placeholderId}.png`);
         }
       }
@@ -79,7 +79,7 @@ function showBeautified() {
       <p class="tf-subtitle">Distilled pieces of information from this page</p>
   `;
   nuggets.forEach((n, i) => {
-    let imgHtml = n.image ? `<img src="${n.image}" style="max-width:100%; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" />` : '';
+    let imgHtml = n.image ? `<img src="${n.image}" style="width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" />` : '';
     let mockDots = `<div style="display:flex; gap: 6px; position:absolute; top: 12px; left: 15px;">
         <div style="width: 10px; height: 10px; border-radius: 50%; background: #ED655A;"></div>
         <div style="width: 10px; height: 10px; border-radius: 50%; background: #E1C04C;"></div>
@@ -146,7 +146,7 @@ function renderTypingChallenge() {
   const text = nugget.text.replace(/\s+/g, ' '); // normalize spaces
   let nuggetStartTime = Date.now();
   
-  let imgHtml = nugget.image ? `<div style="text-align:center; margin-bottom: 25px;"><img src="${nugget.image}" style="max-height: 200px; max-width: 100%; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" /></div>` : '';
+  let imgHtml = nugget.image ? `<div style="text-align:center; margin-bottom: 25px;"><img src="${nugget.image}" style="width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" /></div>` : '';
 
   let html = `<button id="tf-close">✕</button>
     <div class="tf-typing-container">
@@ -259,7 +259,7 @@ function saveAsHTML() {
   if (nuggets.length === 0) extractNuggets();
   const date = new Date().toLocaleDateString();
   const cardsHtml = nuggets.map((n, i) => {
-    let imgHtml = n.image ? `<img src="${n.image}" style="max-width:100%; border-radius: 8px; margin-bottom: 20px;" />` : '';
+    let imgHtml = n.image ? `<img src="${n.image}" style="width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px; margin-bottom: 20px;" />` : '';
     return `<div class="card"><div class="chip">#${i+1}</div>${imgHtml}<div style="white-space:pre-wrap;">${n.text}</div></div>`;
   }).join('');
   let htmlContent = `<!DOCTYPE html>
