@@ -12,13 +12,33 @@ function extractNuggets() {
   for (let p of pTags) {
     const text = p.innerText.trim();
     if (text.length > 50 && text.length < 1500) {
-      let imgNode = p.closest('section, article, figure, .content, div')?.querySelector('img') || p.previousElementSibling?.querySelector('img');
-      if (!imgNode && p.previousElementSibling?.tagName === 'IMG') {
-        imgNode = p.previousElementSibling;
+      // 1. Check inside the paragraph
+      let imgNode = p.querySelector('img');
+      
+      // 2. Check strict immediate preceding elements for images or figures
+      if (!imgNode) {
+        let sibling = p.previousElementSibling;
+        for (let i = 0; i < 3 && sibling; i++) {
+          if (sibling.tagName === 'IMG') { imgNode = sibling; break; }
+          if (sibling.tagName === 'FIGURE' || sibling.className.includes('img') || sibling.className.includes('image')) {
+            imgNode = sibling.querySelector('img');
+            if (imgNode) break;
+          }
+          sibling = sibling.previousElementSibling;
+        }
       }
+
       let imgSrc = imgNode ? imgNode.src : null;
       if (imgNode && (imgNode.width > 0 && imgNode.width < 50)) {
-        imgSrc = null; // discard tiny icons if size is calculable
+        imgSrc = null; // discard tiny icons
+      }
+      
+      // 3. Fallback to generated static placeholder
+      if (!imgSrc) {
+        if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getURL) {
+          const placeholderId = Math.floor(Math.random() * 3) + 1;
+          imgSrc = chrome.runtime.getURL(`icons/placeholders/${placeholderId}.png`);
+        }
       }
       
       nuggets.push({ text: text, image: imgSrc });

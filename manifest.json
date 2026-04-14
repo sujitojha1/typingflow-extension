@@ -35,5 +35,15 @@
         "content.css"
       ]
     }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "icons/placeholders/*.png"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
   ]
 }
