@@ -53,3 +53,8 @@
 - [x] Codebase successfully loads unpackaged locally.
 - [x] Cross-browser compilation and execution testing.
 - [x] Zip compression and formal staging for Chrome Web Store distribution.
+
+## Phase 7: Post-Launch Refinements (From UI Validation)
+- [ ] **Accessibility:** Inject `aria-label` definitions onto the transparent `<input>` typing node to formally orient screen readers on activation.
+- [ ] **Rendering Optimization:** Conditionally simplify the intensive `backdrop-filter: blur(10px)` matrix into a flat `#2A2926` map if scaling across computationally-weak hardware (avoids scroll lagging).
+- [ ] **Animation Decay:** Ease the initial animation transition curve for the master overlay overlay scaling to decrease snap-fatigue.

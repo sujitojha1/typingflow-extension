@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { font-family: sans-serif; padding: 40px; }
+  </style>
+  <link rel="stylesheet" href="content.css">
+</head>
+<body>
+  <h1>Machine Learning</h1>
+  <p>Backpropagation is an algorithm used to calculate the gradients of the loss function with respect to the weights in an artificial neural network. It is widely used for training deep neural networks and remains foundational for modern AI models.</p>
+  <p>The term abbreviation for "backward propagation of errors" refers to the fact that the gradient is computed back-to-front, starting from the output layer through to the input layer.</p>
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Artificial_neural_network.svg/512px-Artificial_neural_network.svg.png" style="width: 200px" />
+  <p>An artificial neural network consists of layers of interconnected nodes. These mathematical constructs loosely simulate biological neurons in animal brains, receiving inputs, applying weights, and emitting signals.</p>
+
+  <script>
+    // Mock Chrome Extension API
+    window.chrome = {
+      runtime: {
+        onMessage: { addListener: function(cb) { window._mockListener = cb; } }
+      },
+      storage: {
+        local: { 
+          get: function(k, cb){ setTimeout(() => cb({}), 10); }, 
+          set: function(){} 
+        }
+      }
+    };
+  </script>
+  <script src="content.js"></script>
+</body>
+</html>
