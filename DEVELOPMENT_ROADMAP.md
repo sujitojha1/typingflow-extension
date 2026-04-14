@@ -33,14 +33,23 @@
 - [x] Inject base CSS styles into the HTML payload so exported documents are standalone and beautiful.
 - [x] Generate on-the-fly Blob Data URLs and seamlessly trigger browser downloads.
 
-## Phase 4: Final Polish & Deployment Tasks
-- [x] Clean up Javascript syntax edge-cases (template literal escaping).
-- [x] Codebase successfully loads unpackaged in Chrome extensions suite.
-- [ ] Cross-browser / multi-layout compatibility testing.
-- [ ] Zip compression and preparation for the Chrome Web Store. 
+## Phase 4: Extended Capabilities & Content Intelligence
+- [x] Execute Semantic Image Parsing to automatically attach relevant contextual imagery directly above text blocks.
+- [x] Integrate Global Local Storage API (`chrome.storage.local`) to record lifetime character keystrokes.
+- [x] Engineer a background visual loop to passively measure and map user "Time on Site" engagement metrics.
+- [x] Inject real-time analytical UI feeds (Live WPM, Accuracy %, and fractional progress).
+- [x] Relax tokenization constraints to handle large semantic paragraphs up to 1,500 characters.
+- [x] Enable bi-directional UI routing via `Prev`/`Next` controls and deep-linking into nuggets by clicking Beautified cards.
 
-## Phase 5: "Claude Terminal" UI Upgrade (Planned Iteration)
-- [ ] Overhaul existing interactive dashboard to resemble a physical "Computer Screen / Terminal" layout.
-- [ ] Implement dark, sophisticated console panels resembling the Claude developer terminal aesthetics.
+## Phase 5: "Claude Terminal" UI Upgrade
+- [x] Overhaul existing interactive dashboard shifting away from vibrant gradients into a structured dark console array.
+- [x] Implement sophisticated monochrome backgrounds (`#2A2926`) mimicking native Claude developer styling.
 - [ ] Design a faux "terminal window" chrome (e.g., mock minimize, maximize, and close window dots) mapping around the active typing nuggets.
-- [ ] Modify prompt elements, metrics, and progress bars to emulate CLI text readouts and active console cursors.
+- [x] Modify prompt elements, metrics, and active character highlights to emulate precise CLI text readouts.
+
+## Phase 6: Final Polish & Deployment
+- [x] Clean up Javascript syntax edge-cases (template literal escaping).
+- [x] Generate, compile, and route persistent `.png` UI icons into local payload directories.
+- [x] Codebase successfully loads unpackaged locally.
+- [ ] Cross-browser compilation and execution testing.
+- [ ] Zip compression and formal staging for Chrome Web Store distribution.
