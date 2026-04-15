@@ -53,7 +53,8 @@ function injectStyles() {
 }
 #tf-close:hover { background:#1a1917 !important; color:#ECEBDE !important; border-color:#3a3834 !important; }
 .tf-inner-wrapper {
-  width:100% !important; padding:40px 5vw 60px !important;
+  max-width:900px !important; width:100% !important;
+  margin:0 auto !important; padding:40px 32px 60px !important;
 }
 .tf-h1 { font-size:15px !important; font-weight:normal !important; color:#D97757 !important; margin:0 0 4px !important; }
 .tf-subtitle { color:#3a3834 !important; font-size:10px !important; letter-spacing:0.5px !important; margin-bottom:28px !important; }
@@ -69,7 +70,7 @@ function injectStyles() {
   border-color:#2a2926 !important; transform:translateX(2px) !important;
 }
 .tf-nugget-idx { display:block !important; font-size:10px !important; color:#5a5550 !important; margin-bottom:10px !important; letter-spacing:1px !important; }
-.tf-typing-container { width:100% !important; padding:28px 5vw 60px !important; }
+.tf-typing-container { max-width:1080px !important; margin:0 auto !important; width:100% !important; padding:28px 32px 60px !important; }
 .tf-typing-card { display:flex !important; gap:40px !important; align-items:flex-start !important; margin-top:24px !important; }
 .tf-card-image { width:300px !important; flex-shrink:0 !important; position:sticky !important; top:76px !important; }
 .tf-card-image img { width:100% !important; border-radius:4px !important; opacity:0.85 !important; object-fit:cover !important; max-height:500px !important; display:block !important; }
@@ -174,8 +175,13 @@ function extractNuggets() {
     return nuggets;
   }
 
-  // Use real page images only — chrome-extension:// URLs are blocked by most pages' CSP
-  nuggets = chunks.map(c => ({ text: c.text, image: c.image || null }));
+  nuggets = chunks.map(c => {
+    let imgSrc = c.image || null;
+    if (!imgSrc && typeof chrome !== 'undefined' && chrome.runtime?.getURL) {
+      imgSrc = chrome.runtime.getURL(`icons/placeholders/${Math.floor(Math.random() * 4) + 1}.png`);
+    }
+    return { text: c.text, image: imgSrc };
+  });
   return nuggets;
 }
 
