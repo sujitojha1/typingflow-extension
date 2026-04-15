@@ -53,7 +53,8 @@ function injectStyles() {
 }
 #tf-close:hover { background:#1a1917 !important; color:#ECEBDE !important; border-color:#3a3834 !important; }
 .tf-inner-wrapper {
-  width:100% !important; padding:40px 5vw 60px !important;
+  max-width:900px !important; width:100% !important;
+  margin:0 auto !important; padding:40px 32px 60px !important;
 }
 .tf-h1 { font-size:15px !important; font-weight:normal !important; color:#D97757 !important; margin:0 0 4px !important; }
 .tf-subtitle { color:#3a3834 !important; font-size:10px !important; letter-spacing:0.5px !important; margin-bottom:28px !important; }
@@ -69,7 +70,11 @@ function injectStyles() {
   border-color:#2a2926 !important; transform:translateX(2px) !important;
 }
 .tf-nugget-idx { display:block !important; font-size:10px !important; color:#5a5550 !important; margin-bottom:10px !important; letter-spacing:1px !important; }
-.tf-typing-container { width:100% !important; padding:28px 5vw 60px !important; }
+.tf-typing-container { max-width:1080px !important; margin:0 auto !important; width:100% !important; padding:28px 32px 60px !important; }
+.tf-typing-card { display:flex !important; gap:40px !important; align-items:flex-start !important; margin-top:24px !important; }
+.tf-card-image { width:300px !important; flex-shrink:0 !important; position:sticky !important; top:76px !important; }
+.tf-card-image img { width:100% !important; border-radius:4px !important; opacity:0.85 !important; object-fit:cover !important; max-height:500px !important; display:block !important; }
+.tf-card-content { flex:1 !important; min-width:0 !important; }
 .tf-typing-header { color:#3a3834 !important; font-size:13px !important; letter-spacing:0.5px !important; margin-bottom:8px !important; }
 .tf-target {
   font-size:clamp(15px,2vw,19px) !important; line-height:2 !important;
@@ -109,79 +114,41 @@ function topBar(title) {
 
 function extractNuggets() {
   nuggets = [];
+  const pTags = Array.from(document.querySelectorAll('p'));
 
-  // Focus on the main content area when possible
-  const root = document.querySelector(
-    'article, main, [role="main"], .post-content, .entry-content, .article-body, .content-body'
-  ) || document.body;
+  for (let p of pTags) {
+    const text = p.innerText.trim();
+    if (text.length > 50 && text.length < 1500) {
+      let imgNode = p.querySelector('img');
 
-  // Collect all content elements in document order
-  const els = Array.from(root.querySelectorAll('p, h2, h3, li, blockquote'));
-
-  const TARGET_CHARS = 600; // aim for ~600 chars per nugget (~100 words)
-  const MIN_CHARS    = 80;  // minimum to form a nugget
-
-  let buffer  = '';
-  let bufImg  = null;
-  const chunks = [];
-
-  function nearbyImage(el) {
-    // Check inside element
-    let img = el.querySelector('img');
-    if (img) return img;
-    // Check up to 4 preceding siblings
-    let sib = el.previousElementSibling;
-    for (let i = 0; i < 4 && sib; i++) {
-      if (sib.tagName === 'IMG') return sib;
-      const cls = typeof sib.className === 'string' ? sib.className : '';
-      if (sib.tagName === 'FIGURE' || cls.includes('img') || cls.includes('image')) {
-        img = sib.querySelector('img');
-        if (img) return img;
+      if (!imgNode) {
+        let sibling = p.previousElementSibling;
+        for (let i = 0; i < 3 && sibling; i++) {
+          if (sibling.tagName === 'IMG') { imgNode = sibling; break; }
+          const cls = typeof sibling.className === 'string' ? sibling.className : '';
+          if (sibling.tagName === 'FIGURE' || cls.includes('img') || cls.includes('image')) {
+            imgNode = sibling.querySelector('img');
+            if (imgNode) break;
+          }
+          sibling = sibling.previousElementSibling;
+        }
       }
-      sib = sib.previousElementSibling;
+
+      let imgSrc = imgNode ? imgNode.src : null;
+      if (imgNode && imgNode.width > 0 && imgNode.width < 50) imgSrc = null;
+
+      if (!imgSrc && typeof chrome !== 'undefined' && chrome.runtime?.getURL) {
+        imgSrc = chrome.runtime.getURL(`icons/placeholders/${Math.floor(Math.random() * 4) + 1}.png`);
+      }
+
+      nuggets.push({ text, image: imgSrc });
+      if (nuggets.length >= 8) break;
     }
-    return null;
   }
 
-  function flush() {
-    if (buffer.length >= MIN_CHARS) {
-      chunks.push({ text: buffer.trim(), image: bufImg });
-    }
-    buffer = '';
-    bufImg  = null;
-  }
-
-  for (const el of els) {
-    if (chunks.length >= 8) break;
-
-    const text = el.innerText.trim();
-    if (text.length < 20) continue;
-
-    // Pick up any real image near this element (skip tiny icons)
-    const img = nearbyImage(el);
-    if (img && !(img.width > 0 && img.width < 50) && img.src && !img.src.startsWith('data:')) {
-      if (!bufImg) bufImg = img.src;
-    }
-
-    // If adding this block would overflow the target, flush first
-    if (buffer.length > 0 && buffer.length + 1 + text.length > TARGET_CHARS) {
-      flush();
-      if (chunks.length >= 8) break;
-    }
-
-    buffer += (buffer ? ' ' : '') + text;
-  }
-
-  flush(); // commit any remaining text
-
-  if (chunks.length === 0) {
+  if (nuggets.length === 0) {
     nuggets = [{ text: 'No substantial content could be extracted from this page.', image: null }];
-    return nuggets;
   }
-
-  // No chrome-extension:// placeholders — they are blocked by most pages' CSP.
-  // Image column shows a decorative CSS panel instead when image is null.
-  nuggets = chunks.map(c => ({ text: c.text, image: c.image || null }));
   return nuggets;
 }
 
@@ -211,8 +178,8 @@ function showBeautified() {
 
   nuggets.forEach((n, i) => {
     const imgHtml = n.image
-      ? `<img src="${n.image}" style="width:100%;max-height:180px;object-fit:cover;border-radius:2px;margin-bottom:16px;opacity:0.85;" />`
-      : `<div style="height:2px;background:linear-gradient(90deg,#D97757 0%,transparent 100%);margin-bottom:16px;border-radius:2px;"></div>`;
+      ? `<img src="${n.image}" style="width:100%;max-height:150px;object-fit:cover;border-radius:2px;margin-bottom:14px;opacity:0.85;" />`
+      : '';
     html += `<div class="tf-nugget-card tf-clickable-card" data-idx="${i}" title="Click to type this nugget">
       <span class="tf-nugget-idx">[${String(i + 1).padStart(2, '0')}] ── click to type ›</span>
       ${imgHtml}<div>${escapeHtml(n.text)}</div>
@@ -274,25 +241,22 @@ function renderTypingChallenge() {
   const prevStyle = `background:none;border:none;color:${prevDisabled ? '#2a2926' : '#5a5550'};font-size:13px;cursor:${prevDisabled ? 'not-allowed' : 'pointer'};font-family:inherit;letter-spacing:0.5px;opacity:${prevDisabled ? 0.3 : 1};padding:4px 0;transition:color 0.1s;`;
   const nextStyle = `background:none;border:none;color:#D97757;font-size:13px;cursor:pointer;font-family:inherit;letter-spacing:0.5px;padding:4px 0;`;
 
-  // Left panel: real image if available, otherwise a styled numbered card.
-  // Always 2-column — inline styles so no host-page CSS can override.
-  const leftPanel = nugget.image
-    ? `<img src="${nugget.image}"
-           style="width:100%;display:block;border-radius:4px;object-fit:cover;max-height:480px;opacity:0.85;"
-           onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
-       <div style="display:none;width:100%;aspect-ratio:3/4;min-height:220px;
-                   background:#111010;border:1px solid #1e1d1b;border-top:3px solid #D97757;
-                   border-radius:4px;align-items:center;justify-content:center;flex-direction:column;gap:6px;">
-         <div style="font-size:52px;color:#1e1d1b;font-family:monospace;line-height:1;">${String(typingIndex + 1).padStart(2, '0')}</div>
-         <div style="font-size:9px;color:#2a2926;letter-spacing:2px;">NO IMAGE</div>
+  // Use inline styles for layout so host-page CSS can never override them
+  const hasImage = !!nugget.image;
+
+  const cardImageHtml = hasImage
+    ? `<div style="width:280px;flex-shrink:0;position:sticky;top:76px;align-self:flex-start;">
+         <img src="${nugget.image}" style="width:100%;display:block;border-radius:4px;object-fit:cover;max-height:480px;opacity:0.85;" />
        </div>`
-    : `<div style="width:100%;aspect-ratio:3/4;min-height:220px;
-                  background:#111010;border:1px solid #1e1d1b;border-top:3px solid #D97757;
-                  border-radius:4px;display:flex;align-items:center;justify-content:center;
-                  flex-direction:column;gap:6px;">
-         <div style="font-size:52px;color:#1e1d1b;font-family:monospace;line-height:1;">${String(typingIndex + 1).padStart(2, '0')}</div>
-         <div style="font-size:9px;color:#2a2926;letter-spacing:2px;">NUGGET</div>
-       </div>`;
+    : '';
+
+  const cardWrapperStyle = hasImage
+    ? `display:flex;flex-direction:row;gap:40px;align-items:flex-start;margin-top:20px;`
+    : `margin-top:20px;`;
+
+  const contentStyle = hasImage
+    ? `flex:1;min-width:0;`
+    : ``;
 
   let html = `
     ${topBar('typingflow — type')}
@@ -308,11 +272,9 @@ function renderTypingChallenge() {
           <span id="tf-live-prog" style="color:#D97757;">0/${text.length}</span>
         </div>
       </div>
-      <div style="display:flex;flex-direction:row;gap:44px;align-items:flex-start;margin-top:20px;">
-        <div style="width:260px;flex-shrink:0;position:sticky;top:76px;align-self:flex-start;">
-          ${leftPanel}
-        </div>
-        <div style="flex:1;min-width:0;">
+      <div style="${cardWrapperStyle}">
+        ${cardImageHtml}
+        <div style="${contentStyle}">
           <div class="tf-typing-header">nugget_${typingIndex + 1}_of_${nuggets.length}.txt</div>
           <div id="tf-target" class="tf-target">`;
 
