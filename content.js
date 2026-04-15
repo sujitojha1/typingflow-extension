@@ -13,17 +13,103 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;');
 }
 
+function injectStyles() {
+  if (document.getElementById('tf-styles')) return;
+  const s = document.createElement('style');
+  s.id = 'tf-styles';
+  s.textContent = `
+@keyframes tf-fade-in { from { opacity:0 } to { opacity:1 } }
+
+#tf-master-overlay {
+  position:fixed !important; inset:0 !important; z-index:2147483647 !important;
+  background:#0d0c0b !important; color:#ECEBDE !important;
+  font-family:'Menlo','Monaco',ui-monospace,'Courier New',monospace !important;
+  display:flex !important; flex-direction:column !important;
+  overflow-y:auto !important; animation:tf-fade-in 0.2s ease !important;
+  box-sizing:border-box !important;
+}
+.tf-topbar {
+  display:flex !important; align-items:center !important; gap:6px !important;
+  padding:14px 24px !important; border-bottom:1px solid #1a1917 !important;
+  background:#0d0c0b !important; position:sticky !important; top:0 !important;
+  z-index:10 !important; flex-shrink:0 !important;
+}
+.tf-dot { width:10px !important; height:10px !important; border-radius:50% !important; flex-shrink:0 !important; }
+.tf-topbar-title { font-size:11px !important; color:#3a3834 !important; margin-left:8px !important; letter-spacing:0.3px !important; }
+#tf-close {
+  margin-left:auto !important; background:transparent !important;
+  border:1px solid #2a2926 !important; color:#5a5550 !important;
+  border-radius:3px !important; width:28px !important; height:28px !important;
+  cursor:pointer !important; font-size:13px !important;
+  display:flex !important; align-items:center !important; justify-content:center !important;
+  transition:all 0.15s !important; font-family:inherit !important;
+}
+#tf-close:hover { background:#1a1917 !important; color:#ECEBDE !important; border-color:#3a3834 !important; }
+.tf-inner-wrapper {
+  max-width:720px !important; width:100% !important;
+  margin:0 auto !important; padding:40px 24px 60px !important;
+}
+.tf-h1 { font-size:15px !important; font-weight:normal !important; color:#D97757 !important; margin:0 0 4px !important; }
+.tf-subtitle { color:#3a3834 !important; font-size:10px !important; letter-spacing:0.5px !important; margin-bottom:28px !important; }
+.tf-nugget-card {
+  background:#111010 !important; border:1px solid #1a1917 !important;
+  border-left:3px solid #D97757 !important; padding:18px 22px !important;
+  border-radius:0 4px 4px 0 !important; margin-bottom:10px !important;
+  font-size:14px !important; line-height:1.7 !important; position:relative !important;
+  transition:all 0.12s ease !important;
+}
+.tf-nugget-card:hover {
+  background:#161514 !important; border-left-color:#E58668 !important;
+  border-color:#2a2926 !important; transform:translateX(2px) !important;
+}
+.tf-nugget-idx { display:block !important; font-size:10px !important; color:#5a5550 !important; margin-bottom:10px !important; letter-spacing:1px !important; }
+.tf-typing-container { max-width:720px !important; margin:0 auto !important; width:100% !important; padding:32px 24px 60px !important; }
+.tf-typing-header { color:#3a3834 !important; font-size:10px !important; letter-spacing:1px !important; margin-bottom:4px !important; }
+.tf-target {
+  font-size:clamp(16px,2.5vw,22px) !important; line-height:1.9 !important;
+  color:#2e2c2a !important; font-family:'Menlo','Monaco',ui-monospace,'Courier New',monospace !important;
+  white-space:pre-wrap !important; word-break:break-word !important; overflow-wrap:break-word !important;
+  margin-top:20px !important;
+}
+.tf-char.correct { color:#ECEBDE !important; }
+.tf-char.wrong { color:#f87171 !important; background:rgba(248,113,113,0.1) !important; }
+.tf-char.cursor { color:#D97757 !important; border-bottom:2px solid #D97757 !important; }
+.tf-input-hidden { opacity:0 !important; position:absolute !important; top:-9999px !important; }
+.tf-action-btn {
+  background:transparent !important; border:1px solid #D97757 !important;
+  padding:8px 20px !important; border-radius:3px !important; color:#D97757 !important;
+  font-size:11px !important; cursor:pointer !important; margin-top:28px !important;
+  font-family:'Menlo','Monaco',ui-monospace,monospace !important;
+  letter-spacing:1px !important; transition:all 0.15s !important;
+}
+.tf-action-btn:hover { background:#D97757 !important; color:#0d0c0b !important; }
+.tf-stats { display:flex !important; gap:12px !important; justify-content:center !important; margin-top:28px !important; }
+.tf-stat-box { border:1px solid #1a1917 !important; padding:16px 24px !important; border-radius:3px !important; text-align:center !important; min-width:80px !important; }
+.tf-stat-val { font-size:22px !important; color:#D97757 !important; margin-bottom:4px !important; }
+.tf-stat-label { font-size:10px !important; color:#3a3834 !important; letter-spacing:1px !important; }
+`;
+  document.head.appendChild(s);
+}
+
+function topBar(title) {
+  return `<div class="tf-topbar">
+    <div class="tf-dot" style="background:#ED655A"></div>
+    <div class="tf-dot" style="background:#E1C04C"></div>
+    <div class="tf-dot" style="background:#72BE47"></div>
+    <span class="tf-topbar-title">${title}</span>
+    <button id="tf-close">✕</button>
+  </div>`;
+}
+
 function extractNuggets() {
   nuggets = [];
   const pTags = Array.from(document.querySelectorAll('p'));
-  
+
   for (let p of pTags) {
     const text = p.innerText.trim();
     if (text.length > 50 && text.length < 1500) {
-      // 1. Check inside the paragraph
       let imgNode = p.querySelector('img');
-      
-      // 2. Check strict immediate preceding elements for images or figures
+
       if (!imgNode) {
         let sibling = p.previousElementSibling;
         for (let i = 0; i < 3 && sibling; i++) {
@@ -38,42 +124,34 @@ function extractNuggets() {
       }
 
       let imgSrc = imgNode ? imgNode.src : null;
-      if (imgNode && (imgNode.width > 0 && imgNode.width < 50)) {
-        imgSrc = null; // discard tiny icons
+      if (imgNode && imgNode.width > 0 && imgNode.width < 50) imgSrc = null;
+
+      if (!imgSrc && typeof chrome !== 'undefined' && chrome.runtime?.getURL) {
+        imgSrc = chrome.runtime.getURL(`icons/placeholders/${Math.floor(Math.random() * 4) + 1}.png`);
       }
-      
-      // 3. Fallback to generated static placeholder
-      if (!imgSrc) {
-        if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getURL) {
-          const placeholderId = Math.floor(Math.random() * 4) + 1;
-          imgSrc = chrome.runtime.getURL(`icons/placeholders/${placeholderId}.png`);
-        }
-      }
-      
-      nuggets.push({ text: text, image: imgSrc });
+
+      nuggets.push({ text, image: imgSrc });
       if (nuggets.length >= 8) break;
     }
   }
 
-  if(nuggets.length === 0) {
-    nuggets = [{ text: "No substantial content could be extracted from this page.", image: null }];
+  if (nuggets.length === 0) {
+    nuggets = [{ text: 'No substantial content could be extracted from this page.', image: null }];
   }
   return nuggets;
 }
 
 function createOverlay() {
+  injectStyles();
   if (overlay) document.body.removeChild(overlay);
   overlay = document.createElement('div');
   overlay.id = 'tf-master-overlay';
   document.body.appendChild(overlay);
-  document.body.style.overflow = 'hidden'; // prevent background scrolling
+  document.body.style.overflow = 'hidden';
 }
 
 function removeOverlay() {
-  if (overlay) {
-    overlay.remove();
-    overlay = null;
-  }
+  if (overlay) { overlay.remove(); overlay = null; }
   document.body.style.overflow = '';
   mode = 'none';
 }
@@ -81,21 +159,22 @@ function removeOverlay() {
 function showBeautified() {
   createOverlay();
   mode = 'beautify';
-  let html = `<button id="tf-close">✕</button>`;
-  html += `
-    <div class="tf-inner-wrapper">
-      <h1 class="tf-h1">Content Nuggets</h1>
-      <p class="tf-subtitle">Distilled pieces of information from this page</p>
-  `;
+
+  let html = topBar('typingflow — extract');
+  html += `<div class="tf-inner-wrapper">
+    <div class="tf-h1">$ extract --page-nuggets</div>
+    <div class="tf-subtitle">${nuggets.length} fragments  ·  click any to type</div>`;
+
   nuggets.forEach((n, i) => {
-    let imgHtml = n.image ? `<img src="${n.image}" style="width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" />` : '';
-    let mockDots = `<div style="display:flex; gap: 6px; position:absolute; top: 12px; left: 15px;">
-        <div style="width: 10px; height: 10px; border-radius: 50%; background: #ED655A;"></div>
-        <div style="width: 10px; height: 10px; border-radius: 50%; background: #E1C04C;"></div>
-        <div style="width: 10px; height: 10px; border-radius: 50%; background: #72BE47;"></div>
-      </div>`;
-    html += `<div class="tf-nugget-card tf-clickable-card" data-idx="${i}" style="cursor: pointer; padding-top: 35px;" title="Click to start typing this nugget">${mockDots}<span class="tf-nugget-idx">#${i+1}</span>${imgHtml}<div style="white-space:pre-wrap;">${escapeHtml(n.text)}</div></div>`;
+    const imgHtml = n.image
+      ? `<img src="${n.image}" style="width:100%;max-height:150px;object-fit:cover;border-radius:2px;margin-bottom:14px;opacity:0.85;" />`
+      : '';
+    html += `<div class="tf-nugget-card tf-clickable-card" data-idx="${i}" title="Click to type this nugget">
+      <span class="tf-nugget-idx">[${String(i + 1).padStart(2, '0')}] ── click to type ›</span>
+      ${imgHtml}<div>${escapeHtml(n.text)}</div>
+    </div>`;
   });
+
   html += `</div>`;
   overlay.innerHTML = html;
 
@@ -112,7 +191,7 @@ function showBeautified() {
 }
 
 function showTyping() {
-  if(nuggets.length === 0) extractNuggets();
+  if (nuggets.length === 0) extractNuggets();
   createOverlay();
   mode = 'type';
   typingIndex = 0;
@@ -126,27 +205,17 @@ function renderTypingChallenge() {
     const elapsedSec = Math.floor((Date.now() - typingStartTime) / 1000);
     const wpm = elapsedSec > 0 ? Math.round((totalCharsTyped / 5) / (elapsedSec / 60)) : 0;
     overlay.innerHTML = `
-      <button id="tf-close">✕</button>
-      <div class="tf-inner-wrapper" style="text-align:center; transform: translateY(30vh);">
-        <h1 class="tf-h1" style="font-size: 40px; margin-bottom: 5px;">Typing Complete!</h1>
-        <p style="color: #9A958E; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">You've actively engaged with all the nuggets.</p>
-        
+      ${topBar('typingflow — complete')}
+      <div class="tf-inner-wrapper" style="text-align:center;padding-top:80px;">
+        <div style="font-size:10px;color:#3a3834;margin-bottom:12px;letter-spacing:1px;">process exited with code 0</div>
+        <div class="tf-h1" style="font-size:22px;margin-bottom:4px;">$ session --complete</div>
+        <div style="color:#3a3834;font-size:10px;margin-bottom:32px;">all ${nuggets.length} nuggets engaged</div>
         <div class="tf-stats">
-          <div class="tf-stat-box">
-             <div class="tf-stat-val">${elapsedSec}s</div>
-             <div class="tf-stat-label">Time Spent</div>
-          </div>
-          <div class="tf-stat-box">
-             <div class="tf-stat-val">${totalCharsTyped}</div>
-             <div class="tf-stat-label">Characters</div>
-          </div>
-          <div class="tf-stat-box">
-             <div class="tf-stat-val">${wpm}</div>
-             <div class="tf-stat-label">WPM</div>
-          </div>
+          <div class="tf-stat-box"><div class="tf-stat-val">${elapsedSec}s</div><div class="tf-stat-label">time</div></div>
+          <div class="tf-stat-box"><div class="tf-stat-val">${totalCharsTyped}</div><div class="tf-stat-label">chars</div></div>
+          <div class="tf-stat-box"><div class="tf-stat-val">${wpm}</div><div class="tf-stat-label">wpm</div></div>
         </div>
-
-        <button id="tf-done-btn" class="tf-action-btn">DONE</button>
+        <button id="tf-done-btn" class="tf-action-btn">exit</button>
       </div>`;
     document.getElementById('tf-close').addEventListener('click', removeOverlay);
     document.getElementById('tf-done-btn').addEventListener('click', removeOverlay);
@@ -154,36 +223,39 @@ function renderTypingChallenge() {
   }
 
   const nugget = nuggets[typingIndex];
-  const text = nugget.text.replace(/\s+/g, ' '); // normalize spaces
+  const text = nugget.text.replace(/\s+/g, ' ');
   let nuggetStartTime = Date.now();
-  
-  let imgHtml = nugget.image ? `<div style="text-align:center; margin-bottom: 25px;"><img src="${nugget.image}" style="width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" /></div>` : '';
 
-  let html = `<button id="tf-close">✕</button>
+  const imgHtml = nugget.image
+    ? `<div style="margin-bottom:20px;"><img src="${nugget.image}" style="width:100%;max-height:150px;object-fit:cover;border-radius:2px;opacity:0.85;" /></div>`
+    : '';
+
+  const prevDisabled = typingIndex === 0;
+  const prevStyle = `background:none;border:none;color:${prevDisabled ? '#2a2926' : '#5a5550'};font-size:11px;cursor:${prevDisabled ? 'not-allowed' : 'pointer'};font-family:inherit;letter-spacing:1px;opacity:${prevDisabled ? 0.3 : 1};padding:4px 0;transition:color 0.1s;`;
+  const nextStyle = `background:none;border:none;color:#D97757;font-size:11px;cursor:pointer;font-family:inherit;letter-spacing:1px;padding:4px 0;`;
+
+  let html = `
+    ${topBar('typingflow — type')}
     <div class="tf-typing-container">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px;">
-        <div style="display:flex; gap: 6px; align-items:center; margin-right: 25px;">
-          <div style="width: 10px; height: 10px; border-radius: 50%; background: #ED655A;"></div>
-          <div style="width: 10px; height: 10px; border-radius: 50%; background: #E1C04C;"></div>
-          <div style="width: 10px; height: 10px; border-radius: 50%; background: #72BE47;"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid #1a1917;">
+        <div style="display:flex;gap:20px;">
+          <button id="tf-prev-btn" style="${prevStyle}">← prev</button>
+          <button id="tf-next-btn" style="${nextStyle}">next →</button>
         </div>
-        <div style="display:flex; gap: 15px; flex: 1;">
-          <button id="tf-prev-btn" style="background:none; border:none; color:#9A958E; font-size:12px; font-weight:600; cursor:${typingIndex === 0 ? 'not-allowed' : 'pointer'}; text-transform:uppercase; letter-spacing:1px; font-family:inherit; opacity: ${typingIndex === 0 ? 0.4 : 1};">⬅ Prev</button>
-          <button id="tf-next-btn" style="background:none; border:none; color:#D97757; font-size:12px; font-weight:600; cursor:pointer; text-transform:uppercase; letter-spacing:1px; font-family:inherit;">Next ➔</button>
-        </div>
-        <div style="color: #9A958E; font-size: 13px; font-family: ui-sans-serif, system-ui, sans-serif; font-weight: 500;">
-          <span id="tf-live-wpm" style="display:inline-block; width:65px">0 WPM</span> • 
-          <span id="tf-live-acc" style="display:inline-block; width:75px">100% ACC</span> • 
-          <span id="tf-live-prog" style="color: #D97757;">0/${text.length}</span>
+        <div style="font-size:10px;color:#3a3834;letter-spacing:0.5px;">
+          <span id="tf-live-wpm">0 wpm</span> &nbsp;·&nbsp;
+          <span id="tf-live-acc">100% acc</span> &nbsp;·&nbsp;
+          <span id="tf-live-prog" style="color:#D97757;">0/${text.length}</span>
         </div>
       </div>
-      <div class="tf-typing-header" style="margin-bottom: 30px;">Nugget ${typingIndex + 1} of ${nuggets.length}</div>
+      <div class="tf-typing-header">nugget_${typingIndex + 1}_of_${nuggets.length}.txt</div>
       ${imgHtml}
       <div id="tf-target" class="tf-target">`;
-  
-  for(let i=0; i<text.length; i++) {
-    html += `<span class="tf-char">${text[i] === ' ' ? '&nbsp;' : text[i]}</span>`;
+
+  for (let i = 0; i < text.length; i++) {
+    html += `<span class="tf-char">${text[i] === ' ' ? '&nbsp;' : escapeHtml(text[i])}</span>`;
   }
+
   html += `</div>
       <input type="text" id="tf-hidden-input" class="tf-input-hidden" autocomplete="off" spellcheck="false" />
     </div>`;
@@ -192,33 +264,23 @@ function renderTypingChallenge() {
 
   const targetDiv = document.getElementById('tf-target');
   const input = document.getElementById('tf-hidden-input');
-  
+
   targetDiv.querySelectorAll('.tf-char')[0]?.classList.add('cursor');
-  
-  // Bring focus to invisible input constantly
   setTimeout(() => input.focus(), 100);
   document.getElementById('tf-master-overlay').addEventListener('click', () => input.focus());
-
   document.getElementById('tf-close').addEventListener('click', removeOverlay);
-  document.getElementById('tf-next-btn').addEventListener('click', () => {
-    typingIndex++;
-    renderTypingChallenge();
-  });
+  document.getElementById('tf-next-btn').addEventListener('click', () => { typingIndex++; renderTypingChallenge(); });
   document.getElementById('tf-prev-btn').addEventListener('click', () => {
-    if (typingIndex > 0) {
-      typingIndex--;
-      renderTypingChallenge();
-    }
+    if (typingIndex > 0) { typingIndex--; renderTypingChallenge(); }
   });
 
-  // Prevent pasting to artificially bypass
   input.addEventListener('paste', e => e.preventDefault());
   input.addEventListener('drop', e => e.preventDefault());
 
   input.addEventListener('input', (e) => {
     const typed = e.target.value;
     const spans = targetDiv.querySelectorAll('.tf-char');
-    
+
     if (typed.length > text.length) {
       input.value = typed.slice(0, text.length);
       return;
@@ -229,39 +291,29 @@ function renderTypingChallenge() {
     spans.forEach((span, i) => {
       span.className = 'tf-char';
       if (i < typed.length) {
-        if (typed[i] === text[i]) {
-          span.classList.add('correct');
-        } else {
-          span.classList.add('wrong');
-          errors++;
-          allCorrect = false;
-        }
+        if (typed[i] === text[i]) { span.classList.add('correct'); }
+        else { span.classList.add('wrong'); errors++; allCorrect = false; }
       } else if (i === typed.length) {
         span.classList.add('cursor');
       }
     });
 
-    // Update live metrics
     const timeElapsedMins = (Date.now() - nuggetStartTime) / 60000;
     const wpm = timeElapsedMins > 0 ? Math.round((typed.length / 5) / timeElapsedMins) : 0;
     const acc = typed.length > 0 ? Math.round(((typed.length - errors) / typed.length) * 100) : 100;
     document.getElementById('tf-live-prog').innerText = `${typed.length}/${text.length}`;
-    document.getElementById('tf-live-wpm').innerText = `${wpm} WPM`;
-    document.getElementById('tf-live-acc').innerText = `${acc}% ACC`;
+    document.getElementById('tf-live-wpm').innerText = `${wpm} wpm`;
+    document.getElementById('tf-live-acc').innerText = `${acc}% acc`;
 
     if (typed.length === text.length && allCorrect) {
       setTimeout(() => {
         totalCharsTyped += text.length;
-        
-        // Save to global tracker
         chrome.storage.local.get(['lifetimeChars'], (res) => {
-          let chars = (res.lifetimeChars || 0) + text.length;
-          chrome.storage.local.set({lifetimeChars: chars});
+          chrome.storage.local.set({ lifetimeChars: (res.lifetimeChars || 0) + text.length });
         });
-
         typingIndex++;
         renderTypingChallenge();
-      }, 400); // short delay to show the final green character
+      }, 400);
     }
   });
 }
@@ -270,27 +322,31 @@ function saveAsHTML() {
   if (nuggets.length === 0) extractNuggets();
   const date = new Date().toLocaleDateString();
   const cardsHtml = nuggets.map((n, i) => {
-    let imgHtml = n.image ? `<img src="${n.image}" style="width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px; margin-bottom: 20px;" />` : '';
-    return `<div class="card"><div class="chip">#${i+1}</div>${imgHtml}<div style="white-space:pre-wrap;">${escapeHtml(n.text)}</div></div>`;
+    const imgHtml = n.image
+      ? `<img src="${n.image}" style="width:100%;max-height:150px;object-fit:cover;border-radius:2px;margin-bottom:16px;opacity:0.85;" />`
+      : '';
+    return `<div class="card"><div class="chip">[${String(i + 1).padStart(2, '0')}]</div>${imgHtml}<div>${escapeHtml(n.text)}</div></div>`;
   }).join('');
-  let htmlContent = `<!DOCTYPE html>
+
+  const htmlContent = `<!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8">
-  <title>TypingFlow Saved Nuggets</title>
+  <title>TypingFlow — Saved Nuggets</title>
   <style>
-    body { font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif; background: #2A2926; color: #ECEBDE; padding: 60px 20px; line-height: 1.6; min-height: 100vh; margin: 0; }
-    .container { max-width: 760px; margin: auto; }
-    .card { background: #32302E; padding: 30px 40px; border-radius: 12px; margin-bottom: 24px; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 4px 12px rgba(0,0,0,0.1); font-size: 18px; }
-    h1 { color: #ECEBDE; font-size: 32px; margin-bottom: 5px; font-family: ui-sans-serif, system-ui, sans-serif;}
-    .meta { color: #9A958E; margin-bottom: 40px; text-transform: uppercase; letter-spacing: 1px; font-size: 12px; font-family: ui-sans-serif, system-ui, sans-serif;}
-    .chip { display: inline-block; font-family: ui-sans-serif, system-ui, sans-serif; font-size: 11px; font-weight: 600; color: #D97757; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:'Menlo','Monaco',ui-monospace,'Courier New',monospace; background:#0d0c0b; color:#ECEBDE; padding:40px 20px; line-height:1.7; }
+    .container { max-width:720px; margin:auto; }
+    h1 { color:#D97757; font-size:15px; font-weight:normal; margin-bottom:4px; }
+    .meta { color:#3a3834; font-size:10px; letter-spacing:0.5px; margin-bottom:32px; }
+    .card { border:1px solid #1a1917; border-left:3px solid #D97757; padding:18px 22px; margin-bottom:10px; border-radius:0 4px 4px 0; font-size:14px; }
+    .chip { font-size:10px; color:#5a5550; margin-bottom:10px; letter-spacing:1px; }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Distilled Nuggets</h1>
-    <div class="meta">Extracted on ${date}</div>
+    <h1>$ typingflow --export-nuggets</h1>
+    <div class="meta">extracted ${date}</div>
     ${cardsHtml}
   </div>
 </body>
@@ -307,14 +363,13 @@ function saveAsHTML() {
   URL.revokeObjectURL(url);
 }
 
-// Single listener addition pattern for content script
 if (!window.tfContentInitialized) {
   window.tfContentInitialized = true;
   chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
     if (request.action === 'ping') {
       sendResponse({ hasNuggets: nuggets.length > 0 });
     } else if (request.action === 'beautify') {
-      if(nuggets.length === 0) extractNuggets();
+      if (nuggets.length === 0) extractNuggets();
       showBeautified();
       sendResponse({ success: true });
     } else if (request.action === 'type') {
@@ -326,7 +381,6 @@ if (!window.tfContentInitialized) {
     }
   });
 
-  // Time tracker for this domain
   let activeSeconds = 0;
   setInterval(() => {
     if (document.visibilityState === 'visible') {
@@ -334,8 +388,7 @@ if (!window.tfContentInitialized) {
       if (activeSeconds % 60 === 0) {
         const domain = window.location.hostname;
         chrome.storage.local.get([domain], (res) => {
-          let mins = (res[domain] || 0) + 1;
-          chrome.storage.local.set({[domain]: mins});
+          chrome.storage.local.set({ [domain]: (res[domain] || 0) + 1 });
         });
       }
     }
