@@ -19,6 +19,7 @@ function injectStyles() {
   s.id = 'tf-styles';
   s.textContent = `
 @keyframes tf-fade-in { from { opacity:0 } to { opacity:1 } }
+@keyframes tf-cursor-blink { 0%,100% { border-bottom-color:#D97757 } 50% { border-bottom-color:transparent } }
 
 #tf-master-overlay {
   position:fixed !important; inset:0 !important; z-index:2147483647 !important;
@@ -27,6 +28,11 @@ function injectStyles() {
   display:flex !important; flex-direction:column !important;
   overflow-y:auto !important; animation:tf-fade-in 0.2s ease !important;
   box-sizing:border-box !important;
+}
+/* Block all host-page text transforms and resets from leaking in */
+#tf-master-overlay, #tf-master-overlay * {
+  text-transform:none !important; font-style:normal !important;
+  text-decoration:none !important; box-sizing:border-box !important;
 }
 .tf-topbar {
   display:flex !important; align-items:center !important; gap:6px !important;
@@ -55,7 +61,7 @@ function injectStyles() {
   background:#111010 !important; border:1px solid #1a1917 !important;
   border-left:3px solid #D97757 !important; padding:18px 22px !important;
   border-radius:0 4px 4px 0 !important; margin-bottom:10px !important;
-  font-size:14px !important; line-height:1.7 !important; position:relative !important;
+  font-size:14px !important; line-height:1.75 !important; position:relative !important;
   transition:all 0.12s ease !important;
 }
 .tf-nugget-card:hover {
@@ -66,14 +72,14 @@ function injectStyles() {
 .tf-typing-container { max-width:720px !important; margin:0 auto !important; width:100% !important; padding:32px 24px 60px !important; }
 .tf-typing-header { color:#3a3834 !important; font-size:10px !important; letter-spacing:1px !important; margin-bottom:4px !important; }
 .tf-target {
-  font-size:clamp(16px,2.5vw,22px) !important; line-height:1.9 !important;
-  color:#2e2c2a !important; font-family:'Menlo','Monaco',ui-monospace,'Courier New',monospace !important;
+  font-size:clamp(15px,2vw,19px) !important; line-height:2 !important;
+  color:#4a4744 !important; font-family:'Menlo','Monaco',ui-monospace,'Courier New',monospace !important;
   white-space:pre-wrap !important; word-break:break-word !important; overflow-wrap:break-word !important;
   margin-top:20px !important;
 }
 .tf-char.correct { color:#ECEBDE !important; }
-.tf-char.wrong { color:#f87171 !important; background:rgba(248,113,113,0.1) !important; }
-.tf-char.cursor { color:#D97757 !important; border-bottom:2px solid #D97757 !important; }
+.tf-char.wrong { color:#f87171 !important; background:rgba(248,113,113,0.14) !important; border-bottom:1px solid #f87171 !important; }
+.tf-char.cursor { color:#D97757 !important; border-bottom:2px solid #D97757 !important; animation:tf-cursor-blink 1s step-end infinite !important; }
 .tf-input-hidden { opacity:0 !important; position:absolute !important; top:-9999px !important; }
 .tf-action-btn {
   background:transparent !important; border:1px solid #D97757 !important;
