@@ -5,6 +5,14 @@ let typingIndex = 0;
 let typingStartTime = 0;
 let totalCharsTyped = 0;
 
+function escapeHtml(str) {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
 function extractNuggets() {
   nuggets = [];
   const pTags = Array.from(document.querySelectorAll('p'));
@@ -20,7 +28,8 @@ function extractNuggets() {
         let sibling = p.previousElementSibling;
         for (let i = 0; i < 3 && sibling; i++) {
           if (sibling.tagName === 'IMG') { imgNode = sibling; break; }
-          if (sibling.tagName === 'FIGURE' || sibling.className.includes('img') || sibling.className.includes('image')) {
+          const cls = typeof sibling.className === 'string' ? sibling.className : '';
+          if (sibling.tagName === 'FIGURE' || cls.includes('img') || cls.includes('image')) {
             imgNode = sibling.querySelector('img');
             if (imgNode) break;
           }
@@ -85,7 +94,7 @@ function showBeautified() {
         <div style="width: 10px; height: 10px; border-radius: 50%; background: #E1C04C;"></div>
         <div style="width: 10px; height: 10px; border-radius: 50%; background: #72BE47;"></div>
       </div>`;
-    html += `<div class="tf-nugget-card tf-clickable-card" data-idx="${i}" style="cursor: pointer; padding-top: 35px;" title="Click to start typing this nugget">${mockDots}<span class="tf-nugget-idx">#${i+1}</span>${imgHtml}<div style="white-space:pre-wrap;">${n.text}</div></div>`;
+    html += `<div class="tf-nugget-card tf-clickable-card" data-idx="${i}" style="cursor: pointer; padding-top: 35px;" title="Click to start typing this nugget">${mockDots}<span class="tf-nugget-idx">#${i+1}</span>${imgHtml}<div style="white-space:pre-wrap;">${escapeHtml(n.text)}</div></div>`;
   });
   html += `</div>`;
   overlay.innerHTML = html;
@@ -94,6 +103,8 @@ function showBeautified() {
   document.querySelectorAll('.tf-clickable-card').forEach(card => {
     card.addEventListener('click', (e) => {
       typingIndex = parseInt(e.currentTarget.getAttribute('data-idx'));
+      typingStartTime = Date.now();
+      totalCharsTyped = 0;
       mode = 'type';
       renderTypingChallenge();
     });
@@ -260,7 +271,7 @@ function saveAsHTML() {
   const date = new Date().toLocaleDateString();
   const cardsHtml = nuggets.map((n, i) => {
     let imgHtml = n.image ? `<img src="${n.image}" style="width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px; margin-bottom: 20px;" />` : '';
-    return `<div class="card"><div class="chip">#${i+1}</div>${imgHtml}<div style="white-space:pre-wrap;">${n.text}</div></div>`;
+    return `<div class="card"><div class="chip">#${i+1}</div>${imgHtml}<div style="white-space:pre-wrap;">${escapeHtml(n.text)}</div></div>`;
   }).join('');
   let htmlContent = `<!DOCTYPE html>
 <html>
@@ -299,7 +310,7 @@ function saveAsHTML() {
 // Single listener addition pattern for content script
 if (!window.tfContentInitialized) {
   window.tfContentInitialized = true;
-  chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
     if (request.action === 'ping') {
       sendResponse({ hasNuggets: nuggets.length > 0 });
     } else if (request.action === 'beautify') {

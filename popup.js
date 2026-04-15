@@ -56,6 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Button 1: Beautify
   btnBeautify.addEventListener('click', () => {
     chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
+      if (!tabs[0]) return;
       sendMessageWithInjection(tabs[0].id, {action: "beautify"}, (resp) => {
         if (resp && resp.success) enableButtons();
       });
@@ -65,6 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Button 2: Typing Flow
   btnType.addEventListener('click', () => {
     chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
+      if (!tabs[0]) return;
       sendMessageWithInjection(tabs[0].id, {action: "type"});
     });
   });
@@ -72,6 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Button 3: Save HTML
   btnSave.addEventListener('click', () => {
     chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
+      if (!tabs[0]) return;
       sendMessageWithInjection(tabs[0].id, {action: "save"});
     });
   });
