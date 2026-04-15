@@ -53,8 +53,7 @@ function injectStyles() {
 }
 #tf-close:hover { background:#1a1917 !important; color:#ECEBDE !important; border-color:#3a3834 !important; }
 .tf-inner-wrapper {
-  max-width:900px !important; width:100% !important;
-  margin:0 auto !important; padding:40px 32px 60px !important;
+  width:100% !important; padding:40px 5vw 60px !important;
 }
 .tf-h1 { font-size:15px !important; font-weight:normal !important; color:#D97757 !important; margin:0 0 4px !important; }
 .tf-subtitle { color:#3a3834 !important; font-size:10px !important; letter-spacing:0.5px !important; margin-bottom:28px !important; }
@@ -70,7 +69,7 @@ function injectStyles() {
   border-color:#2a2926 !important; transform:translateX(2px) !important;
 }
 .tf-nugget-idx { display:block !important; font-size:10px !important; color:#5a5550 !important; margin-bottom:10px !important; letter-spacing:1px !important; }
-.tf-typing-container { max-width:1080px !important; margin:0 auto !important; width:100% !important; padding:28px 32px 60px !important; }
+.tf-typing-container { width:100% !important; padding:28px 5vw 60px !important; }
 .tf-typing-card { display:flex !important; gap:40px !important; align-items:flex-start !important; margin-top:24px !important; }
 .tf-card-image { width:300px !important; flex-shrink:0 !important; position:sticky !important; top:76px !important; }
 .tf-card-image img { width:100% !important; border-radius:4px !important; opacity:0.85 !important; object-fit:cover !important; max-height:500px !important; display:block !important; }
@@ -114,41 +113,69 @@ function topBar(title) {
 
 function extractNuggets() {
   nuggets = [];
-  const pTags = Array.from(document.querySelectorAll('p'));
 
-  for (let p of pTags) {
-    const text = p.innerText.trim();
-    if (text.length > 50 && text.length < 1500) {
-      let imgNode = p.querySelector('img');
+  // Prefer focused content containers over the whole body
+  const root = document.querySelector(
+    'article, main, [role="main"], .post-content, .entry-content, .article-body, .content-body'
+  ) || document.body;
 
-      if (!imgNode) {
-        let sibling = p.previousElementSibling;
-        for (let i = 0; i < 3 && sibling; i++) {
-          if (sibling.tagName === 'IMG') { imgNode = sibling; break; }
-          const cls = typeof sibling.className === 'string' ? sibling.className : '';
-          if (sibling.tagName === 'FIGURE' || cls.includes('img') || cls.includes('image')) {
-            imgNode = sibling.querySelector('img');
-            if (imgNode) break;
-          }
-          sibling = sibling.previousElementSibling;
-        }
+  // Collect text-bearing elements; skip nav/header/footer/sidebar noise
+  const els = Array.from(root.querySelectorAll('p, h2, h3, li, blockquote'))
+    .filter(el => !el.closest('nav, header, footer, aside, [role="navigation"], [role="banner"], [role="complementary"]'));
+
+  const TARGET = 600; // aim for ~600 chars (~100 words) per nugget
+  const MIN    = 80;
+
+  let buffer = '';
+  let bufImg  = null;
+  const chunks = [];
+
+  function nearbyImg(el) {
+    let img = el.querySelector('img');
+    if (img) return img;
+    let sib = el.previousElementSibling;
+    for (let i = 0; i < 4 && sib; i++) {
+      if (sib.tagName === 'IMG') return sib;
+      const cls = typeof sib.className === 'string' ? sib.className : '';
+      if (sib.tagName === 'FIGURE' || cls.includes('img') || cls.includes('image')) {
+        img = sib.querySelector('img'); if (img) return img;
       }
-
-      let imgSrc = imgNode ? imgNode.src : null;
-      if (imgNode && imgNode.width > 0 && imgNode.width < 50) imgSrc = null;
-
-      if (!imgSrc && typeof chrome !== 'undefined' && chrome.runtime?.getURL) {
-        imgSrc = chrome.runtime.getURL(`icons/placeholders/${Math.floor(Math.random() * 4) + 1}.png`);
-      }
-
-      nuggets.push({ text, image: imgSrc });
-      if (nuggets.length >= 8) break;
+      sib = sib.previousElementSibling;
     }
+    return null;
   }
 
-  if (nuggets.length === 0) {
-    nuggets = [{ text: 'No substantial content could be extracted from this page.', image: null }];
+  function flush() {
+    if (buffer.length >= MIN) chunks.push({ text: buffer.trim(), image: bufImg });
+    buffer = ''; bufImg = null;
   }
+
+  for (const el of els) {
+    if (chunks.length >= 8) break;
+    const text = el.innerText.trim();
+    // Skip very short fragments, pure numbers, or lines that look like UI/nav labels
+    if (text.length < 25 || /^[\d\s\W]+$/.test(text)) continue;
+
+    const img = nearbyImg(el);
+    if (img && !(img.width > 0 && img.width < 50) && img.src && !img.src.startsWith('data:') && !bufImg) {
+      bufImg = img.src;
+    }
+
+    if (buffer.length > 0 && buffer.length + 1 + text.length > TARGET) {
+      flush();
+      if (chunks.length >= 8) break;
+    }
+    buffer += (buffer ? ' ' : '') + text;
+  }
+  flush();
+
+  if (chunks.length === 0) {
+    nuggets = [{ text: 'No substantial content could be extracted from this page.', image: null }];
+    return nuggets;
+  }
+
+  // Use real page images only — chrome-extension:// URLs are blocked by most pages' CSP
+  nuggets = chunks.map(c => ({ text: c.text, image: c.image || null }));
   return nuggets;
 }
 
