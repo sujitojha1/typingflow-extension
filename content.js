@@ -41,19 +41,19 @@ function injectStyles() {
   z-index:10 !important; flex-shrink:0 !important;
 }
 .tf-dot { width:10px !important; height:10px !important; border-radius:50% !important; flex-shrink:0 !important; }
-.tf-topbar-title { font-size:11px !important; color:#3a3834 !important; margin-left:8px !important; letter-spacing:0.3px !important; }
+.tf-topbar-title { font-size:13px !important; color:#3a3834 !important; margin-left:8px !important; letter-spacing:0.3px !important; }
 #tf-close {
   margin-left:auto !important; background:transparent !important;
   border:1px solid #2a2926 !important; color:#5a5550 !important;
-  border-radius:3px !important; width:28px !important; height:28px !important;
-  cursor:pointer !important; font-size:13px !important;
+  border-radius:3px !important; width:38px !important; height:38px !important;
+  cursor:pointer !important; font-size:17px !important;
   display:flex !important; align-items:center !important; justify-content:center !important;
   transition:all 0.15s !important; font-family:inherit !important;
 }
 #tf-close:hover { background:#1a1917 !important; color:#ECEBDE !important; border-color:#3a3834 !important; }
 .tf-inner-wrapper {
-  max-width:720px !important; width:100% !important;
-  margin:0 auto !important; padding:40px 24px 60px !important;
+  max-width:900px !important; width:100% !important;
+  margin:0 auto !important; padding:40px 32px 60px !important;
 }
 .tf-h1 { font-size:15px !important; font-weight:normal !important; color:#D97757 !important; margin:0 0 4px !important; }
 .tf-subtitle { color:#3a3834 !important; font-size:10px !important; letter-spacing:0.5px !important; margin-bottom:28px !important; }
@@ -69,8 +69,12 @@ function injectStyles() {
   border-color:#2a2926 !important; transform:translateX(2px) !important;
 }
 .tf-nugget-idx { display:block !important; font-size:10px !important; color:#5a5550 !important; margin-bottom:10px !important; letter-spacing:1px !important; }
-.tf-typing-container { max-width:720px !important; margin:0 auto !important; width:100% !important; padding:32px 24px 60px !important; }
-.tf-typing-header { color:#3a3834 !important; font-size:10px !important; letter-spacing:1px !important; margin-bottom:4px !important; }
+.tf-typing-container { max-width:1080px !important; margin:0 auto !important; width:100% !important; padding:28px 32px 60px !important; }
+.tf-typing-card { display:flex !important; gap:40px !important; align-items:flex-start !important; margin-top:24px !important; }
+.tf-card-image { width:300px !important; flex-shrink:0 !important; position:sticky !important; top:76px !important; }
+.tf-card-image img { width:100% !important; border-radius:4px !important; opacity:0.85 !important; object-fit:cover !important; max-height:500px !important; display:block !important; }
+.tf-card-content { flex:1 !important; min-width:0 !important; }
+.tf-typing-header { color:#3a3834 !important; font-size:13px !important; letter-spacing:0.5px !important; margin-bottom:8px !important; }
 .tf-target {
   font-size:clamp(15px,2vw,19px) !important; line-height:2 !important;
   color:#4a4744 !important; font-family:'Menlo','Monaco',ui-monospace,'Courier New',monospace !important;
@@ -232,31 +236,36 @@ function renderTypingChallenge() {
   const text = nugget.text.replace(/\s+/g, ' ');
   let nuggetStartTime = Date.now();
 
-  const imgHtml = nugget.image
-    ? `<div style="margin-bottom:20px;"><img src="${nugget.image}" style="width:100%;max-height:150px;object-fit:cover;border-radius:2px;opacity:0.85;" /></div>`
+  const prevDisabled = typingIndex === 0;
+  const prevStyle = `background:none;border:none;color:${prevDisabled ? '#2a2926' : '#5a5550'};font-size:13px;cursor:${prevDisabled ? 'not-allowed' : 'pointer'};font-family:inherit;letter-spacing:0.5px;opacity:${prevDisabled ? 0.3 : 1};padding:4px 0;transition:color 0.1s;`;
+  const nextStyle = `background:none;border:none;color:#D97757;font-size:13px;cursor:pointer;font-family:inherit;letter-spacing:0.5px;padding:4px 0;`;
+
+  const cardImageHtml = nugget.image
+    ? `<div class="tf-card-image"><img src="${nugget.image}" /></div>`
     : '';
 
-  const prevDisabled = typingIndex === 0;
-  const prevStyle = `background:none;border:none;color:${prevDisabled ? '#2a2926' : '#5a5550'};font-size:11px;cursor:${prevDisabled ? 'not-allowed' : 'pointer'};font-family:inherit;letter-spacing:1px;opacity:${prevDisabled ? 0.3 : 1};padding:4px 0;transition:color 0.1s;`;
-  const nextStyle = `background:none;border:none;color:#D97757;font-size:11px;cursor:pointer;font-family:inherit;letter-spacing:1px;padding:4px 0;`;
+  const textContent = `
+    <div class="tf-card-content">
+      <div class="tf-typing-header">nugget_${typingIndex + 1}_of_${nuggets.length}.txt</div>
+      <div id="tf-target" class="tf-target">`;
 
   let html = `
     ${topBar('typingflow — type')}
     <div class="tf-typing-container">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid #1a1917;">
-        <div style="display:flex;gap:20px;">
+        <div style="display:flex;gap:24px;">
           <button id="tf-prev-btn" style="${prevStyle}">← prev</button>
           <button id="tf-next-btn" style="${nextStyle}">next →</button>
         </div>
-        <div style="font-size:10px;color:#3a3834;letter-spacing:0.5px;">
+        <div style="font-size:12px;color:#3a3834;letter-spacing:0.5px;">
           <span id="tf-live-wpm">0 wpm</span> &nbsp;·&nbsp;
           <span id="tf-live-acc">100% acc</span> &nbsp;·&nbsp;
           <span id="tf-live-prog" style="color:#D97757;">0/${text.length}</span>
         </div>
       </div>
-      <div class="tf-typing-header">nugget_${typingIndex + 1}_of_${nuggets.length}.txt</div>
-      ${imgHtml}
-      <div id="tf-target" class="tf-target">`;
+      <div class="${nugget.image ? 'tf-typing-card' : ''}">
+        ${cardImageHtml}
+        ${textContent}`;
 
   for (let i = 0; i < text.length; i++) {
     html += `<span class="tf-char">${text[i] === ' ' ? '&nbsp;' : escapeHtml(text[i])}</span>`;
@@ -264,7 +273,7 @@ function renderTypingChallenge() {
 
   html += `</div>
       <input type="text" id="tf-hidden-input" class="tf-input-hidden" autocomplete="off" spellcheck="false" />
-    </div>`;
+    </div></div></div>`;
 
   overlay.innerHTML = html;
 
