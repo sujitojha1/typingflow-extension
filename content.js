@@ -14,7 +14,8 @@ function escapeHtml(str) {
 }
 
 function injectStyles() {
-  if (document.getElementById('tf-styles')) return;
+  const existing = document.getElementById('tf-styles');
+  if (existing) existing.remove(); // always replace so updates take effect
   const s = document.createElement('style');
   s.id = 'tf-styles';
   s.textContent = `
@@ -240,14 +241,22 @@ function renderTypingChallenge() {
   const prevStyle = `background:none;border:none;color:${prevDisabled ? '#2a2926' : '#5a5550'};font-size:13px;cursor:${prevDisabled ? 'not-allowed' : 'pointer'};font-family:inherit;letter-spacing:0.5px;opacity:${prevDisabled ? 0.3 : 1};padding:4px 0;transition:color 0.1s;`;
   const nextStyle = `background:none;border:none;color:#D97757;font-size:13px;cursor:pointer;font-family:inherit;letter-spacing:0.5px;padding:4px 0;`;
 
-  const cardImageHtml = nugget.image
-    ? `<div class="tf-card-image"><img src="${nugget.image}" /></div>`
+  // Use inline styles for layout so host-page CSS can never override them
+  const hasImage = !!nugget.image;
+
+  const cardImageHtml = hasImage
+    ? `<div style="width:280px;flex-shrink:0;position:sticky;top:76px;align-self:flex-start;">
+         <img src="${nugget.image}" style="width:100%;display:block;border-radius:4px;object-fit:cover;max-height:480px;opacity:0.85;" />
+       </div>`
     : '';
 
-  const textContent = `
-    <div class="tf-card-content">
-      <div class="tf-typing-header">nugget_${typingIndex + 1}_of_${nuggets.length}.txt</div>
-      <div id="tf-target" class="tf-target">`;
+  const cardWrapperStyle = hasImage
+    ? `display:flex;flex-direction:row;gap:40px;align-items:flex-start;margin-top:20px;`
+    : `margin-top:20px;`;
+
+  const contentStyle = hasImage
+    ? `flex:1;min-width:0;`
+    : ``;
 
   let html = `
     ${topBar('typingflow — type')}
@@ -263,17 +272,21 @@ function renderTypingChallenge() {
           <span id="tf-live-prog" style="color:#D97757;">0/${text.length}</span>
         </div>
       </div>
-      <div class="${nugget.image ? 'tf-typing-card' : ''}">
+      <div style="${cardWrapperStyle}">
         ${cardImageHtml}
-        ${textContent}`;
+        <div style="${contentStyle}">
+          <div class="tf-typing-header">nugget_${typingIndex + 1}_of_${nuggets.length}.txt</div>
+          <div id="tf-target" class="tf-target">`;
 
   for (let i = 0; i < text.length; i++) {
     html += `<span class="tf-char">${text[i] === ' ' ? '&nbsp;' : escapeHtml(text[i])}</span>`;
   }
 
   html += `</div>
-      <input type="text" id="tf-hidden-input" class="tf-input-hidden" autocomplete="off" spellcheck="false" />
-    </div></div></div>`;
+          <input type="text" id="tf-hidden-input" class="tf-input-hidden" autocomplete="off" spellcheck="false" />
+        </div>
+      </div>
+    </div>`;
 
   overlay.innerHTML = html;
 
