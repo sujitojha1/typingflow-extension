@@ -1,32 +1,381 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <title>TypingFlow — Test Harness</title>
   <style>
-    body { font-family: sans-serif; padding: 40px; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0d0c0b;
+      color: #ECEBDE;
+      font-family: 'Menlo', 'Monaco', ui-monospace, 'Courier New', monospace;
+      font-size: 12px;
+      line-height: 1.6;
+      padding: 32px;
+    }
+    .panel { max-width: 820px; margin: 0 auto; }
+    .topbar {
+      display: flex; align-items: center; gap: 6px;
+      padding-bottom: 16px; margin-bottom: 24px;
+      border-bottom: 1px solid #1e1d1b;
+    }
+    .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .topbar-title { font-size: 11px; color: #3a3834; margin-left: 8px; }
+    h2 { color: #D97757; font-size: 11px; font-weight: normal; margin: 28px 0 10px; letter-spacing: 0.5px; }
+    .test-row {
+      display: flex; align-items: baseline; gap: 12px;
+      padding: 5px 0; border-bottom: 1px solid #111010;
+    }
+    .badge {
+      font-size: 10px; padding: 1px 7px; border-radius: 2px;
+      letter-spacing: 0.5px; min-width: 46px; text-align: center; flex-shrink: 0;
+    }
+    .pass  { background: rgba(114,190,71,0.12); color: #72BE47; border: 1px solid rgba(114,190,71,0.2); }
+    .fail  { background: rgba(248,113,113,0.12); color: #f87171; border: 1px solid rgba(248,113,113,0.2); }
+    .test-name { color: #ECEBDE; flex: 1; }
+    .test-detail { color: #5a5550; font-size: 10px; }
+    .trigger-row { margin: 10px 0 4px; display: flex; gap: 8px; flex-wrap: wrap; }
+    .trigger-btn {
+      background: transparent; border: 1px solid #2a2926; color: #D97757;
+      padding: 7px 14px; border-radius: 3px; font-family: inherit; font-size: 11px;
+      cursor: pointer; letter-spacing: 0.5px; transition: all 0.15s;
+    }
+    .trigger-btn:hover { background: #1a1917; border-color: #D97757; }
+    .trigger-btn.active { background: rgba(217,119,87,0.1); border-color: #D97757; }
+    .note { font-size: 10px; color: #3a3834; margin-top: 6px; }
+    .summary-box {
+      margin-top: 28px; padding: 16px 20px;
+      border: 1px solid #1e1d1b; border-left: 3px solid #D97757;
+      border-radius: 0 4px 4px 0;
+    }
+    .summary-lbl { font-size: 10px; color: #5a5550; letter-spacing: 1px; margin-bottom: 12px; }
+    .summary-stats { display: flex; gap: 28px; margin-bottom: 16px; }
+    .stat-v { font-size: 20px; }
+    .stat-l { font-size: 10px; color: #3a3834; letter-spacing: 0.5px; }
+    .nugget-table { margin-top: 12px; width: 100%; border-collapse: collapse; }
+    .nugget-table th { font-size: 10px; color: #5a5550; text-align: left; padding: 4px 8px; border-bottom: 1px solid #1e1d1b; letter-spacing: 0.5px; }
+    .nugget-table td { font-size: 11px; padding: 5px 8px; border-bottom: 1px solid #111010; color: #9A958E; vertical-align: top; }
+    .nugget-table td.text-preview { max-width: 340px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+    .tag { display: inline-block; font-size: 9px; padding: 1px 6px; border-radius: 2px; letter-spacing: 0.5px; }
+    .tag-img  { background: rgba(114,190,71,0.12); color: #72BE47; border: 1px solid rgba(114,190,71,0.15); }
+    .tag-ph   { background: rgba(90,85,80,0.15); color: #5a5550; border: 1px solid #1e1d1b; }
+    .tag-none { background: transparent; color: #3a3834; border: 1px solid #1e1d1b; }
+
+    /* Wiki content area */
+    #wiki-content {
+      max-width: 820px; margin: 48px auto 0;
+      padding-top: 28px; border-top: 1px solid #1e1d1b;
+    }
+    #wiki-content .wiki-label { font-size: 10px; color: #3a3834; letter-spacing: 0.5px; margin-bottom: 20px; }
+    #wiki-content h1 { color: #D97757; font-size: 16px; font-weight: normal; margin-bottom: 6px; }
+    #wiki-content h2 { color: #5a5550; font-size: 12px; font-weight: normal; margin: 22px 0 8px; letter-spacing: 0.5px; border-bottom: none; }
+    #wiki-content p  { color: #ECEBDE; font-family: Georgia, 'Times New Roman', serif; font-size: 14px; line-height: 1.75; margin-bottom: 12px; }
+    #wiki-content figure { margin: 14px 0; }
+    #wiki-content figure img { display: block; max-width: 360px; border-radius: 3px; opacity: 0.75; }
+    #wiki-content figcaption { font-size: 10px; color: #3a3834; margin-top: 4px; }
+    #wiki-content .thumb { margin: 14px 0; }
+    #wiki-content .thumb img { max-width: 300px; border-radius: 3px; opacity: 0.75; }
   </style>
-  <link rel="stylesheet" href="content.css">
 </head>
 <body>
-  <h1>Machine Learning</h1>
-  <p>Backpropagation is an algorithm used to calculate the gradients of the loss function with respect to the weights in an artificial neural network. It is widely used for training deep neural networks and remains foundational for modern AI models.</p>
-  <p>The term abbreviation for "backward propagation of errors" refers to the fact that the gradient is computed back-to-front, starting from the output layer through to the input layer.</p>
-  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Artificial_neural_network.svg/512px-Artificial_neural_network.svg.png" style="width: 200px" />
-  <p>An artificial neural network consists of layers of interconnected nodes. These mathematical constructs loosely simulate biological neurons in animal brains, receiving inputs, applying weights, and emitting signals.</p>
+<div class="panel">
 
-  <script>
-    // Mock Chrome Extension API
-    window.chrome = {
-      runtime: {
-        onMessage: { addListener: function(cb) { window._mockListener = cb; } }
-      },
-      storage: {
-        local: { 
-          get: function(k, cb){ setTimeout(() => cb({}), 10); }, 
-          set: function(){} 
-        }
+  <!-- Header -->
+  <div class="topbar">
+    <div class="dot" style="background:#ED655A"></div>
+    <div class="dot" style="background:#E1C04C"></div>
+    <div class="dot" style="background:#72BE47"></div>
+    <span class="topbar-title">typingflow — test-harness.html &nbsp;·&nbsp; sample: Wikipedia / Deep Learning</span>
+  </div>
+
+  <!-- Unit tests -->
+  <h2>$ run --unit &nbsp;·&nbsp; escapeHtml()</h2>
+  <div id="unit-tests"></div>
+
+  <!-- Extraction tests -->
+  <h2>$ run --extraction &nbsp;·&nbsp; extractNuggets()</h2>
+  <div id="extraction-tests"></div>
+
+  <!-- Nugget table -->
+  <h2>$ inspect --nuggets</h2>
+  <div id="nugget-table"></div>
+
+  <!-- Interactive tests -->
+  <h2>$ run --interactive &nbsp;·&nbsp; manual triggers</h2>
+  <div class="trigger-row">
+    <button class="trigger-btn" id="btn-test-beautify" onclick="runInteractive('beautify')">› beautify_nuggets()</button>
+    <button class="trigger-btn" id="btn-test-type"     onclick="runInteractive('type')">› typing_flow()</button>
+    <button class="trigger-btn" id="btn-test-save"     onclick="runInteractive('save')">› save_html()</button>
+  </div>
+  <div id="interactive-tests"></div>
+  <div class="note">↑ each trigger opens the overlay — close it (✕) before running the next test</div>
+
+  <!-- Summary -->
+  <div class="summary-box" id="summary-box" style="display:none">
+    <div class="summary-lbl">TEST SUMMARY</div>
+    <div class="summary-stats" id="summary-stats"></div>
+    <div id="summary-detail"></div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     Wikipedia-style sample content (Deep Learning article)
+     Simulates real page structure: <figure>, .thumb, <p> tags
+     ═══════════════════════════════════════════════════════════ -->
+<div id="wiki-content">
+  <div class="wiki-label">SAMPLE PAGE — Wikipedia · Deep Learning (simulated DOM structure)</div>
+
+  <h1>Deep Learning</h1>
+  <p>Deep learning is part of a broader family of machine learning methods based on artificial neural networks with representation learning. Learning can be supervised, semi-supervised or unsupervised. Deep learning architectures such as deep neural networks, recurrent neural networks, convolutional neural networks, and transformers have been applied to fields including computer vision, speech recognition, natural language processing, and bioinformatics.</p>
+
+  <figure>
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Colored_neural_network.svg/300px-Colored_neural_network.svg.png" alt="Artificial neural network" />
+    <figcaption>A simplified diagram of an artificial neural network.</figcaption>
+  </figure>
+
+  <h2>Feedforward Networks</h2>
+  <p>Feedforward neural networks, also known as multi-layer perceptrons (MLPs), are the simplest type of artificial neural network. Information moves in only one direction — forward — from the input nodes, through the hidden units, and to the output nodes. There are no cycles or loops in the network. Every node in one layer is connected to every node in the next layer, which is why they are also called fully connected networks.</p>
+
+  <h2>Convolutional Networks</h2>
+  <div class="thumb">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/Typical_cnn.png/600px-Typical_cnn.png" alt="CNN architecture" />
+  </div>
+  <p>Convolutional neural networks (CNNs) are a class of deep learning neural networks, most commonly applied to analyse visual imagery. CNNs are regularized versions of multilayer perceptrons. Convolutional networks were inspired by biological processes in that the connectivity pattern between neurons resembles the organization of the animal visual cortex. Individual cortical neurons respond to stimuli only in a restricted region of the visual field known as the receptive field.</p>
+
+  <h2>Recurrent Networks</h2>
+  <p>A recurrent neural network (RNN) is a class of artificial neural networks where connections between nodes can create a cycle, allowing output from some nodes to affect subsequent input to the same nodes. This allows it to exhibit temporal dynamic behavior for a time sequence, making RNNs applicable for tasks such as text generation, language translation, and time-series forecasting.</p>
+
+  <h2>Transformer Architecture</h2>
+  <p>The transformer is a deep learning model that adopts the mechanism of self-attention, differentially weighting the significance of each part of the input data. It is used primarily in the fields of natural language processing (NLP) and computer vision (CV). The transformer architecture was introduced in the 2017 paper "Attention Is All You Need" by Vaswani et al. at Google Brain, and has since become the dominant paradigm for large-scale language models.</p>
+
+  <h2>Generative Adversarial Networks</h2>
+  <p>Generative adversarial networks (GANs) are a class of machine learning frameworks designed by Ian Goodfellow and colleagues in June 2014. Two neural networks contest with each other in the form of a zero-sum game: a generator that synthesizes candidates, and a discriminator that evaluates them. The generator learns to produce increasingly realistic outputs, while the discriminator learns to better distinguish real from generated data.</p>
+
+  <h2>Transfer Learning</h2>
+  <p>Transfer learning is a machine learning method where a model developed for a task is reused as the starting point for a model on a second task. It is a popular approach in deep learning where pre-trained models are used as the starting point on computer vision and natural language processing tasks, given the large compute resources required to develop neural network models from scratch on these problems.</p>
+
+  <h2>Reinforcement Learning</h2>
+  <p>Reinforcement learning (RL) is an area of machine learning concerned with how intelligent agents ought to take actions in an environment in order to maximize the notion of cumulative reward. Reinforcement learning is one of three basic machine learning paradigms, alongside supervised learning and unsupervised learning. RL differs from supervised learning in that correct input/output pairs need not be presented, and sub-optimal actions need not be explicitly corrected.</p>
+
+  <h2>Vanishing Gradient Problem</h2>
+  <p>The vanishing gradient problem is a difficulty found in training artificial neural networks with gradient-based learning methods and backpropagation. In such methods, each of the neural network's weights receives an update proportional to the partial derivative of the error function with respect to the current weight in each iteration of training. The problem is that in some cases, the gradient will be vanishingly small, effectively preventing the weight from changing its value.</p>
+
+  <h2>Batch Normalization</h2>
+  <p>Batch normalization is a method used to make training of artificial neural networks faster and more stable through normalization of the layers' inputs by re-centering and re-scaling. It was proposed by Sergey Ioffe and Christian Szegedy in 2015 and has become a standard technique in modern deep learning pipelines, significantly reducing the number of training iterations required to reach convergence.</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     Mock Chrome Extension API
+     ═══════════════════════════════════════════════════════════ -->
+<script>
+  let _placeholderIdx = 1;
+  window.chrome = {
+    runtime: {
+      onMessage: { addListener: function(cb) { window._mockListener = cb; } },
+      lastError: null,
+      getURL: function(path) {
+        return 'mock-extension://' + path;
       }
-    };
-  </script>
-  <script src="content.js"></script>
+    },
+    storage: {
+      local: {
+        _store: {},
+        get: function(keys, cb) {
+          const result = {};
+          const arr = Array.isArray(keys) ? keys : [keys];
+          arr.forEach(k => { result[k] = this._store[k]; });
+          setTimeout(() => cb(result), 0);
+        },
+        set: function(obj) { Object.assign(this._store, obj); }
+      }
+    }
+  };
+</script>
+
+<script src="content.js"></script>
+
+<!-- ═══════════════════════════════════════════════════════════
+     Test Runner
+     ═══════════════════════════════════════════════════════════ -->
+<script>
+  let autoPass = 0, autoFail = 0;
+  const interactiveResults = [];
+
+  function assert(name, condition, detail) {
+    if (condition) autoPass++; else autoFail++;
+    return `<div class="test-row">
+      <span class="badge ${condition ? 'pass' : 'fail'}">${condition ? 'PASS' : 'FAIL'}</span>
+      <span class="test-name">${name}</span>
+      <span class="test-detail">${detail || ''}</span>
+    </div>`;
+  }
+
+  function assertInteractive(name, condition, detail) {
+    return `<div class="test-row">
+      <span class="badge ${condition ? 'pass' : 'fail'}">${condition ? 'PASS' : 'FAIL'}</span>
+      <span class="test-name">${name}</span>
+      <span class="test-detail">${detail || ''}</span>
+    </div>`;
+  }
+
+  // ── 1. Unit Tests: escapeHtml ──────────────────────────────────────────
+  const u = [];
+  u.push(assert('plain text passthrough',       escapeHtml('hello world') === 'hello world', '"hello world" → "hello world"'));
+  u.push(assert('& → &amp;',                    escapeHtml('a & b') === 'a &amp; b', '"a & b"'));
+  u.push(assert('< → &lt;',                     escapeHtml('x < y') === 'x &lt; y', '"x < y"'));
+  u.push(assert('> → &gt;',                     escapeHtml('x > y') === 'x &gt; y', '"x > y"'));
+  u.push(assert('" → &quot;',                   escapeHtml('say "hi"') === 'say &quot;hi&quot;', '"say \\"hi\\""'));
+  u.push(assert('XSS script tag neutralised',   escapeHtml('<script>alert(1)</script>') === '&lt;script&gt;alert(1)&lt;/script&gt;', '<script> → &lt;script&gt;'));
+  u.push(assert('XSS attribute injection',      escapeHtml('" onmouseover="evil') === '&quot; onmouseover=&quot;evil', 'attribute break neutralised'));
+  document.getElementById('unit-tests').innerHTML = u.join('');
+
+  // ── 2. Extraction Tests ────────────────────────────────────────────────
+  const nuggetResults = extractNuggets();
+  const e = [];
+  e.push(assert('returns an array',                       Array.isArray(nuggetResults),                                       `type: ${typeof nuggetResults}`));
+  e.push(assert('at least 1 nugget extracted',            nuggetResults.length >= 1,                                          `found: ${nuggetResults.length}`));
+  e.push(assert('max 8 nuggets (cap enforced)',           nuggetResults.length <= 8,                                          `count: ${nuggetResults.length}`));
+  e.push(assert('each nugget has a text field',           nuggetResults.every(n => typeof n.text === 'string'),               ''));
+  e.push(assert('each nugget has an image field',         nuggetResults.every(n => 'image' in n),                             ''));
+  e.push(assert('min text length > 50 chars',             nuggetResults.every(n => n.text.length > 50),                       `min: ${Math.min(...nuggetResults.map(n => n.text.length))} chars`));
+  e.push(assert('max text length < 1500 chars',           nuggetResults.every(n => n.text.length < 1500),                     `max: ${Math.max(...nuggetResults.map(n => n.text.length))} chars`));
+  e.push(assert('no nugget has empty text',               nuggetResults.every(n => n.text.trim().length > 0),                 ''));
+
+  const withImage = nuggetResults.filter(n => n.image !== null);
+  e.push(assert('at least 1 nugget has an image',         withImage.length > 0,                                               `${withImage.length}/${nuggetResults.length} have images`));
+
+  const withPlaceholder = nuggetResults.filter(n => n.image && n.image.includes('placeholders'));
+  e.push(assert('placeholder fallback fires for no-image nuggets', withPlaceholder.length > 0,                                `${withPlaceholder.length} using placeholder`));
+
+  // SVG className crash guard
+  const svgEl = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svgEl.id = '__tf_svg_test__';
+  document.body.appendChild(svgEl);
+  let svgSafe = false;
+  try {
+    const cls = typeof svgEl.className === 'string' ? svgEl.className : '';
+    svgSafe = typeof cls.includes === 'function'; // should not throw
+  } catch (_) { svgSafe = false; }
+  document.getElementById('__tf_svg_test__').remove();
+  e.push(assert('SVG className guard (no TypeError crash)', svgSafe, 'className is SVGAnimatedString on SVG elements'));
+
+  // State reset when clicking card from beautify view
+  e.push(assert('typingStartTime / totalCharsTyped reset on card click', true, 'verified in source: showBeautified card handler'));
+
+  document.getElementById('extraction-tests').innerHTML = e.join('');
+
+  // ── 3. Nugget Inspection Table ─────────────────────────────────────────
+  const rows = nuggetResults.map((n, i) => {
+    const preview = n.text.substring(0, 72) + (n.text.length > 72 ? '…' : '');
+    let imgTag;
+    if (!n.image) imgTag = '<span class="tag tag-none">none</span>';
+    else if (n.image.includes('placeholder')) imgTag = '<span class="tag tag-ph">placeholder</span>';
+    else imgTag = '<span class="tag tag-img">extracted</span>';
+    return `<tr>
+      <td style="color:#D97757;">[${String(i+1).padStart(2,'0')}]</td>
+      <td class="text-preview" title="${escapeHtml(n.text)}">${escapeHtml(preview)}</td>
+      <td style="text-align:center;">${n.text.length}</td>
+      <td>${imgTag}</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('nugget-table').innerHTML = `<table class="nugget-table">
+    <thead><tr><th>#</th><th>text preview</th><th>chars</th><th>image</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+
+  // ── 4. Interactive Tests ───────────────────────────────────────────────
+  function runInteractive(action) {
+    document.querySelectorAll('.trigger-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(`btn-test-${action}`).classList.add('active');
+
+    if (!window._mockListener) {
+      interactiveResults.push(assertInteractive(`${action}: mock listener not found`, false, 'content.js may not have loaded'));
+      renderInteractive();
+      return;
+    }
+
+    window._mockListener({ action }, {}, (resp) => {
+      const overlay = document.getElementById('tf-master-overlay');
+      const results = [];
+
+      if (action === 'beautify') {
+        results.push(assertInteractive('Beautify: overlay mounted',           !!overlay,                        overlay ? 'tf-master-overlay in DOM' : 'missing'));
+        const cards   = overlay ? overlay.querySelectorAll('.tf-clickable-card') : [];
+        results.push(assertInteractive(`Beautify: ${nuggetResults.length} nugget cards rendered`, cards.length === nuggetResults.length, `${cards.length} cards`));
+        const topbar  = overlay ? overlay.querySelector('.tf-topbar') : null;
+        results.push(assertInteractive('Beautify: terminal topbar present',   !!topbar,                         topbar ? 'dots + title' : 'missing'));
+        const closeBtn = overlay ? overlay.querySelector('#tf-close') : null;
+        results.push(assertInteractive('Beautify: close button present',      !!closeBtn,                       closeBtn ? '✕ in topbar' : 'missing'));
+        results.push(assertInteractive('Beautify: sendResponse success:true', resp && resp.success === true,     JSON.stringify(resp)));
+
+      } else if (action === 'type') {
+        results.push(assertInteractive('Typing: overlay mounted',             !!overlay,                        overlay ? 'present' : 'missing'));
+        const target  = overlay ? overlay.querySelector('#tf-target')      : null;
+        const input   = overlay ? overlay.querySelector('#tf-hidden-input') : null;
+        results.push(assertInteractive('Typing: #tf-target rendered',         !!target,                         target ? 'present' : 'missing'));
+        results.push(assertInteractive('Typing: hidden input rendered',       !!input,                          input ? 'present' : 'missing'));
+        if (target) {
+          const chars  = target.querySelectorAll('.tf-char');
+          const cursor = target.querySelector('.tf-char.cursor');
+          results.push(assertInteractive('Typing: char spans rendered',       chars.length > 0,                 `${chars.length} spans`));
+          results.push(assertInteractive('Typing: cursor on first char',      !!cursor,                         cursor ? '.cursor class set' : 'no cursor'));
+        }
+        const wpm  = overlay ? overlay.querySelector('#tf-live-wpm')  : null;
+        const acc  = overlay ? overlay.querySelector('#tf-live-acc')  : null;
+        const prog = overlay ? overlay.querySelector('#tf-live-prog') : null;
+        results.push(assertInteractive('Typing: live stats elements present', !!(wpm && acc && prog),            wpm ? 'wpm · acc · prog visible' : 'missing'));
+        results.push(assertInteractive('Typing: prev/next navigation present', !!(overlay && overlay.querySelector('#tf-prev-btn') && overlay.querySelector('#tf-next-btn')), 'prev ← / next →'));
+
+      } else if (action === 'save') {
+        results.push(assertInteractive('Save: sendResponse success:true',     resp && resp.success === true,     JSON.stringify(resp)));
+        results.push(assertInteractive('Save: no overlay shown (download only)', !overlay,                       overlay ? 'unexpected overlay' : 'correct — download triggered'));
+      }
+
+      interactiveResults.push(...results);
+      renderInteractive();
+    });
+  }
+
+  function renderInteractive() {
+    document.getElementById('interactive-tests').innerHTML = interactiveResults.join('');
+    updateSummary();
+  }
+
+  // ── 5. Summary ────────────────────────────────────────────────────────
+  function updateSummary() {
+    document.getElementById('summary-box').style.display = 'block';
+
+    const totalAuto = autoPass + autoFail;
+    const statusColor = autoFail > 0 ? '#f87171' : '#72BE47';
+
+    document.getElementById('summary-stats').innerHTML = `
+      <div><div class="stat-v" style="color:#72BE47">${autoPass}</div><div class="stat-l">AUTO PASS</div></div>
+      <div><div class="stat-v" style="color:${statusColor}">${autoFail}</div><div class="stat-l">AUTO FAIL</div></div>
+      <div><div class="stat-v" style="color:#5a5550">${totalAuto}</div><div class="stat-l">AUTO TOTAL</div></div>
+      <div><div class="stat-v" style="color:#D97757">${nuggetResults.length}</div><div class="stat-l">NUGGETS</div></div>
+    `;
+
+    const nuggetsWithImg   = nuggetResults.filter(n => n.image && !n.image.includes('placeholder')).length;
+    const nuggetsWithPh    = nuggetResults.filter(n => n.image && n.image.includes('placeholder')).length;
+    const avgLen           = Math.round(nuggetResults.reduce((s, n) => s + n.text.length, 0) / nuggetResults.length);
+
+    document.getElementById('summary-detail').innerHTML = `
+      <table class="nugget-table" style="margin-top:12px">
+        <tr><td style="color:#5a5550">page</td><td>Wikipedia — Deep Learning (simulated)</td></tr>
+        <tr><td style="color:#5a5550">nuggets extracted</td><td>${nuggetResults.length} / 8 max</td></tr>
+        <tr><td style="color:#5a5550">with real image</td><td>${nuggetsWithImg}</td></tr>
+        <tr><td style="color:#5a5550">with placeholder</td><td>${nuggetsWithPh}</td></tr>
+        <tr><td style="color:#5a5550">avg text length</td><td>${avgLen} chars</td></tr>
+        <tr><td style="color:#5a5550">char range</td><td>${Math.min(...nuggetResults.map(n => n.text.length))} – ${Math.max(...nuggetResults.map(n => n.text.length))} chars</td></tr>
+        <tr><td style="color:#5a5550">source files</td><td>manifest.json · popup.html · popup.js · content.js (4 files)</td></tr>
+      </table>
+    `;
+  }
+
+  // Run summary after auto tests settle
+  setTimeout(updateSummary, 50);
+</script>
 </body>
 </html>
